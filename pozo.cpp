@@ -1,9 +1,6 @@
 #include <iostream>
 #include <array>
-
-extern "C" {
-	#include <conio.h>
-}
+#include <conio.h>
 
 #define ARRIBA    'w'
 #define ABAJO     's'
@@ -66,7 +63,6 @@ void print_tablero(Tablero_t tablero, Coordenadas_t pj) {
 
 		cout << '\n';
 	}
-	cout << "{" << pj.first << ", " << pj.second << "}\n";
 }
 
 void print_minas(Tablero_t tablero, Coordenadas_t pj, bool imprimir_bomba = true) {	
@@ -91,7 +87,7 @@ void print_minas(Tablero_t tablero, Coordenadas_t pj, bool imprimir_bomba = true
 	}
 
 	if (imprimir_bomba) {
-		cout << "Habia una bomba en {" << pj.first << ", " << pj.second << "}\n";
+		cout << "Habia un pozo en {" << pj.first << ", " << pj.second << "}\n";
 		return;
 	}
 
@@ -122,9 +118,7 @@ int main() {
 
 	while (!game_over(posiciones, pj_pos)) {
 		// si no esta tocando ninguna tecla, omite el ciclo
-		if (!kbhit()) {
-			continue;
-		}
+		if (!kbhit()) { continue; }
 
 		// si no obtiene el input
 		char key_pressed = static_cast<char>(getch());
