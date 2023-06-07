@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 struct Persona {
 	string nombre;
 

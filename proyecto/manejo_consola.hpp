@@ -17,7 +17,7 @@ void ocultar_cursor() {
   SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
 
-std::pair<std::size_t, std::size_t> obtener_centro_consola() {
+std::pair<int64_t, int64_t> obtener_centro_consola() {
   CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
   GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
 

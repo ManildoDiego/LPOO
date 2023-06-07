@@ -1,5 +1,3 @@
-#define DEBUG
-
 #include <cstdlib>
 #include <iostream>
 
