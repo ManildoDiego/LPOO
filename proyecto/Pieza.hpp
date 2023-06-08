@@ -7,7 +7,7 @@
 #include "colors.hpp"
 
 // tipo de la pieza
-enum Tipo_Pieza {
+enum class Tipo_Pieza {
   PARED_VERTICAL,     // Simbolo: ║ (azul)
   PARED_HORIZONTAL,   // Simbolo: ═ (azul)
 
@@ -18,6 +18,8 @@ enum Tipo_Pieza {
   IN_ARRIBA_IZQUIERDA, // Simbolo: ╝ (azul)
 
 	INTERCECCION_ABAJO, // Simbolo: ╦ (azul)
+
+	BARRERA,
 
 	PUNTOS, // Simbolo: ■ (blanco)
 	VACIO,  // Simbolo: ■ (negro)
@@ -53,9 +55,11 @@ const std::map<Tipo_Pieza, Pieza> Piezas = {
 	{Tipo_Pieza::IN_ARRIBA_IZQUIERDA, Pieza(static_cast<char>(188), color.blue)},
 
 	{Tipo_Pieza::INTERCECCION_ABAJO, Pieza(static_cast<char>(203), color.blue)},
+
+	{Tipo_Pieza::BARRERA, Pieza(static_cast<char>(205), color.reset)},
 	
 	{Tipo_Pieza::PUNTOS, Pieza(static_cast<char>(219), color.white)},
 	{Tipo_Pieza::VACIO,  Pieza(static_cast<char>(' '), color.black)},
 	{Tipo_Pieza::PACMAN, Pieza(static_cast<char>(002), color.yellow)},
-	{Tipo_Pieza::FRUTA,  Pieza(static_cast<char>(007), color.red)},
+	{Tipo_Pieza::FRUTA,  Pieza(static_cast<char>(220), color.red)},
 };

@@ -27,7 +27,6 @@ std::pair<int64_t, int64_t> obtener_centro_consola() {
   return {x, y};
 }
 
-
 void print_debug(const std::string& str) {
   #ifdef DEBUG
     std::cout << "\x1B[36m" << "[DEBUG] -> " << str << "\033[0m";
