@@ -1,4 +1,5 @@
 #define DEBUG
+#define JUEGO
 #include <cstdlib>
 #include <iostream>
 
@@ -10,12 +11,13 @@ extern "C" {
 #include "Map.hpp"
 #include "manejo_consola.hpp"
 
+#define TICK_RATE 250
+
 using namespace std;
 
 int main() {
 	ocultar_cursor();
 
-__menu:
 	while (1) {
 		bool salir = menu();
 		if (salir) {
@@ -37,13 +39,13 @@ __menu:
 		}
 
 		if (static_cast<int>(input_key) == 27) {
-			goto __menu;
+			main();
 		}
 
 		mapa.actualizar(&input_key, anterior);
 		cout << mapa << endl;
 
-		Sleep(200);
+		Sleep(TICK_RATE);
 	}
 
 	main();

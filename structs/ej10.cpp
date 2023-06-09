@@ -28,6 +28,10 @@ struct Cancion {
 	}
 };
 
+void borrarCancion(vector<Cancion>& canciones, size_t indice) {
+  canciones.erase(canciones.begin() + indice);
+}
+
 int main() {
 	vector<Cancion> canciones{};
 	size_t i = 0;
