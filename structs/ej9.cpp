@@ -100,17 +100,17 @@ int main() {
 
 				bool encontrado = false;
 				for (const auto& c : canciones) {
-				    if (c.nombreCompleto.find(to_find) != string::npos) {
-				        if (!encontrado) {
-				            cout << "Canciones encontradas:" << endl;
-				            encontrado = true;
-				        }
-				        cout << c << endl;
-				    }
+			    if (c.nombreCompleto.find(to_find) != string::npos) {
+		        if (!encontrado) {
+	            cout << "Canciones encontradas:" << endl;
+	            encontrado = true;
+		        }
+		        cout << c << endl;
+			    }
 				}
 
 				if (!encontrado) {
-				    cout << "No se encontraron canciones que coincidan con \"" << to_find << '\"' << endl;
+			    cout << "No se encontraron canciones que coincidan con \"" << to_find << '\"' << endl;
 				}
 				system("pause");
 				break;
