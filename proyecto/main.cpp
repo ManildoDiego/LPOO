@@ -1,5 +1,3 @@
-#define DEBUG
-#define JUEGO
 #include <cstdlib>
 #include <iostream>
 
@@ -7,9 +5,8 @@ extern "C" {
 	#include <conio.h>
 }
 
-#include "menu.hpp"
-#include "Map.hpp"
-#include "manejo_consola.hpp"
+#include "src/menu.hpp"
+#include "src/Game.hpp"
 
 #define TICK_RATE 250
 
@@ -25,14 +22,14 @@ int main() {
 		}
 	}
 
-	Map mapa{};
+	Game juego{};
 
 	char input_key = '\0';
 	char anterior;
 
-	cout << mapa << endl;
+	cout << juego << endl;
 	
-	while (!mapa.murio()) {
+	while (!juego.murio()) {
 		if (kbhit()) {
 			anterior = input_key;
 			input_key = static_cast<char>(getch());
@@ -42,8 +39,8 @@ int main() {
 			main();
 		}
 
-		mapa.actualizar(&input_key, anterior);
-		cout << mapa << endl;
+		juego.actualizar(&input_key, anterior);
+		cout << juego << endl;
 
 		Sleep(TICK_RATE);
 	}

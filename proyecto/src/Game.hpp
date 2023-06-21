@@ -2,7 +2,6 @@
 
 #include <array>
 #include <vector>
-#include <map>
 
 #include "Pieza.hpp"
 #include "PacMan.hpp"
@@ -29,7 +28,7 @@ using Mapa_t = std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE>;
 #define MOVER_DERECHA(k)   (k == DERECHA   || k == controles.at(2).second)
 #define MOVER_IZQUIERDA(k) (k == IZQUIERDA || k == controles.at(3).second)
 
-struct Map {
+struct Game {
 	using Coords_t = std::pair<int64_t, int64_t>;
 	PacMan pacman;
 private:
@@ -64,15 +63,15 @@ private:
 	bool posicion_valida(const Pieza&);
 	void crear_disenio();
 public:
-	Map();
+	Game();
 
-	friend std::ostream& operator<<(std::ostream&, const Map&);
+	friend std::ostream& operator<<(std::ostream&, const Game&);
 
 	void actualizar(char*, char);
 	bool murio() { return vidas < 1; }
 };
 
-void Map::llenar_mapa(const Pieza& p) {
+void Game::llenar_mapa(const Pieza& p) {
 	for (std::size_t i = 0; i < filas; i++) {
 		for (std::size_t j = 0; j < columnas; j++) {
 			m_map.at(i).at(j) = p;
@@ -80,19 +79,19 @@ void Map::llenar_mapa(const Pieza& p) {
 	}
 }
 
-void Map::vaciar_fila(std::size_t _inicio, std::size_t _final, std::size_t _fila, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
+void Game::vaciar_fila(std::size_t _inicio, std::size_t _final, std::size_t _fila, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
 	for (std::size_t i = _inicio; i < _final; i++) {
 		m_map.at(i).at(_fila) = pieza;
 	}
 }
 
-void Map::vaciar_columna(std::size_t _inicio, std::size_t _final, std::size_t _columna, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
+void Game::vaciar_columna(std::size_t _inicio, std::size_t _final, std::size_t _columna, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
 	for (std::size_t j = _inicio; j < _final; j++) {
 		m_map.at(_columna).at(j) = pieza;
 	}
 }
 
-void Map::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
+void Game::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   pos = {pos.first, pos.second};
 
   m_map.at(pos.first).at(pos.second) = Piezas.at(Tipo_Pieza::IN_ABAJO_DERECHA);
@@ -113,7 +112,7 @@ void Map::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   m_map.at(pos.first + h - 1).at(j) = Piezas.at(Tipo_Pieza::IN_ARRIBA_IZQUIERDA);
 }
 
-void Map::modificar_posicion(char k) {
+void Game::modificar_posicion(char k) {
 	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
 		pacman.set_pos({14, COLUMNAS_SIZE-1});
 	}
@@ -128,7 +127,7 @@ void Map::modificar_posicion(char k) {
 	else if (MOVER_IZQUIERDA(k)) { pacman.set_pos(pacman.pos.first, pacman.pos.second-1); }
 }
 
-void Map::comprobar_colisiones_fantasmas() {
+void Game::comprobar_colisiones_fantasmas() {
 	for (const auto& f : fantasmas) {
 		if (f.pos == pacman.pos) {
 			pacman.pos = pacman_init_pos;
@@ -138,7 +137,7 @@ void Map::comprobar_colisiones_fantasmas() {
 	}
 }
 
-void Map::actualizar_fantasmas() {
+void Game::actualizar_fantasmas() {
 	mover_fantasma++;
 	if ((mover_fantasma % TIMER_MOV_FANTASMAS) == 0) {
 		for (std::size_t i = 0; i < fantasmas.size(); i++) {
@@ -147,9 +146,9 @@ void Map::actualizar_fantasmas() {
 	}
 }
 
-void Map::crear_frutas() { m_map.at(3).at(1) = Piezas.at(Tipo_Pieza::FRUTA); }
+void Game::crear_frutas() { m_map.at(3).at(1) = Piezas.at(Tipo_Pieza::FRUTA); }
 
-void Map::comprobar_colisiones_fruta() {
+void Game::comprobar_colisiones_fruta() {
 	if (m_map.at(pacman.pos.first).at(pacman.pos.second) == Piezas.at(Tipo_Pieza::FRUTA)) {
 		puntuacion += 100;
 		m_map.at(pacman.pos.first).at(pacman.pos.second) = Piezas.at(Tipo_Pieza::VACIO);
@@ -167,7 +166,7 @@ void Map::comprobar_colisiones_fruta() {
 	}
 }
 
-Map::Map() {
+Game::Game() {
 	pacman.pos = pacman_init_pos;
 	pacman.prev_pos = pacman.pos;
 	
@@ -194,7 +193,7 @@ Map::Map() {
 	crear_frutas();
 }
 
-void Map::crear_disenio() {
+void Game::crear_disenio() {
 	// portal izquierdo, parte de arriba
 	crear_rectangulo({9, 0}, 6, 5);
 	vaciar_fila(9, 14, 0);
@@ -318,7 +317,7 @@ void Map::crear_disenio() {
 	m_map.at(27).at(20) = Piezas.at(Tipo_Pieza::IN_ARRIBA_DERECHA);
 }
 
-bool Map::posicion_valida(const Pieza& p) {
+bool Game::posicion_valida(const Pieza& p) {
 	return 
 	p == Piezas.at(Tipo_Pieza::PACMAN) || 
 	p == Piezas.at(Tipo_Pieza::PUNTOS) || 
@@ -326,7 +325,7 @@ bool Map::posicion_valida(const Pieza& p) {
 	p == Piezas.at(Tipo_Pieza::FRUTA);
 }
 
-void Map::actualizar(char* k, char anterior) {
+void Game::actualizar(char* k, char anterior) {
 	const auto old_position = pacman.pos;
 
 	modificar_posicion(*k);
@@ -345,7 +344,7 @@ void Map::actualizar(char* k, char anterior) {
 	comprobar_colisiones_fruta();
 }
 
-std::ostream& operator<<(std::ostream& os, const Map& m) {
+std::ostream& operator<<(std::ostream& os, const Game& m) {
 	system("cls");
 		
 #ifdef DEBUG
