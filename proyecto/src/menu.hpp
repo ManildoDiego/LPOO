@@ -53,11 +53,11 @@ void menu_opciones() {
 		if (kbhit()) {
 			input_key = static_cast<char>(getch());
 
-			if (static_cast<int>(input_key) == 27) {
+			if (input_key == ESC) {
 				return;
 			}
 
-			if (static_cast<int>(input_key) == 13) {
+			if (input_key == ENTER) {
 				if (n == controles.size()) { return; }
 				std::cout << "Ingrese una tecla: ";
 				char key = '\0';
@@ -125,8 +125,7 @@ void mostrar_menu(size_t opcion) {
 	}
 }
 
-bool menu() {
-	bool salir = false;
+bool menu(Game* juego) {
 	char input_key = '\0';
 	static size_t n = 0;
 	system("cls");
@@ -134,38 +133,27 @@ bool menu() {
 	if (kbhit()) {
 		input_key = static_cast<char>(getch());
 
-		if (static_cast<int>(input_key) == 27) {
+		if (input_key == ESC) {
 			salida:
 			system("cls");
 			std::cout << "Gracias por jugar!\n";
-			exit(0);
+			salir(*&juego);
 		}
 
 		if (input_key == ARRIBA && n > 0)     { n--; } 
 		else if (input_key == ABAJO && n < 2) { n++; }
 	}
 
-	if (static_cast<int>(input_key) == 13) {
+	if (input_key == ENTER) {
 		switch (n) {
-			case 0:
-				salir = true;
-				break;
-
-			case 1: 
-				menu_opciones();
-				break;
-			
-			case 2:
-				goto salida;
-				break;
-				
+			case 0: return true;
+			case 1: menu_opciones(); break;
+			case 2: goto salida;     break;
 			default:
 				throw std::invalid_argument("Opcion invalida (0-2) -> " + std::to_string(n));
 				break;
 		}
 	}
-
-	if (salir) { return salir; }
 
 	mostrar_menu(n);
 

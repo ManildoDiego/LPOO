@@ -58,7 +58,7 @@ const std::map<Tipo_Pieza, Pieza> Piezas = {
 
 	{Tipo_Pieza::BARRERA, Pieza(static_cast<char>(205), color.reset)},
 	
-	{Tipo_Pieza::PUNTOS, Pieza(static_cast<char>(219), color.white)},
+	{Tipo_Pieza::PUNTOS, Pieza(static_cast<char>('*'), color.white)},
 	{Tipo_Pieza::VACIO,  Pieza(static_cast<char>(' '), color.black)},
 	{Tipo_Pieza::PACMAN, Pieza(static_cast<char>(002), color.yellow)},
 	{Tipo_Pieza::FRUTA,  Pieza(static_cast<char>(220), color.red)},
