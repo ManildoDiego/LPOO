@@ -7,7 +7,7 @@ struct Inky final : public Fantasma {
 	
 	std::string get_color() const override { return color.blue; }
 protected:
-	void _M_mover(const PacMan& p) override {
+	void seguir_pacman(const PacMan& p) override {
 		const int64_t target_x = p.pos.first + 2 * (p.pos.first - pos.first);
 		const int64_t target_y = p.pos.second + 2 * (p.pos.second - pos.second);
 

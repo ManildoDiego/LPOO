@@ -5,8 +5,7 @@ extern "C" {
 	#include <conio.h>
 }
 
-
-#define TICK_RATE 250
+#define TICK_RATE 150
 #define ESC   static_cast<char>(27)
 #define ENTER static_cast<char>(13)
 
@@ -15,7 +14,14 @@ FILE* puntuacion = fopen(file_name, "r+");
 
 #include "src/Game.hpp"
 
-void salir(Game* juego) {
+void salir(const Game* juego) {
+	system("cls");
+	std::cout << "Gracias por jugar!\n";
+	std::cout << color.magenta << "Creditos:\n";
+	std::cout << color.green << "\tManildo Diego    " << color.reset << "-> programador\n";
+	std::cout << color.red   << "\tFransico Tumulty " << color.reset << "-> diseniador grafico\n";
+	std::cout << color.blue  << "\tJoaquin Pagano   " << color.reset << "-> diseniador y programador\n";
+	
 	if (juego != nullptr) {
 		fprintf(puntuacion, "%llu", juego->get_puntuacion());
 	}
@@ -28,14 +34,16 @@ void salir(Game* juego) {
 using namespace std;
 
 int main() {
+inicio:
+	system("cls");
 	ocultar_cursor();
 
 	if (puntuacion == NULL) {
 		system("cls");
-		cout << "Creando archivo de puntaje"; Sleep(1000);
-		cout << '.';                          Sleep(1000);
-		cout << '.';                          Sleep(1000);
-		cout << '.' << endl;                  Sleep(1000);
+		cout << "Creando archivo de puntaje"; Sleep(500);
+		cout << '.';                          Sleep(500);
+		cout << '.';                          Sleep(500);
+		cout << '.' << endl;                  Sleep(500);
 		
 		puntuacion = fopen(file_name, "w+");
 
@@ -44,8 +52,7 @@ int main() {
 		Sleep(1000);
 	}
 
-inicio:
-	Game juego{puntuacion};
+	Game juego{};
 
 	while (1) {
 		bool salir = menu(&juego);
@@ -54,9 +61,8 @@ inicio:
 		}
 	}
 
-
 	char input_key = '\0';
-	char anterior;
+	char anterior = '\0';
 
 	cout << juego << endl;
 	

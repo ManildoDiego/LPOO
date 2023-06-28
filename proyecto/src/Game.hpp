@@ -41,8 +41,6 @@ private:
 	const char* name_file = "Puntaje.txt";
 	Mapa_t m_map{};
 
-	FILE*& m_puntos;
-
 	const Coords_t pacman_init_pos = {17, 13};
 	static const std::size_t filas    = FILAS_SIZE;
 	static const std::size_t columnas = COLUMNAS_SIZE;
@@ -62,7 +60,7 @@ private:
 	void fill_fila(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void fill_columna(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void crear_rectangulo(Coords_t, std::size_t, std::size_t);
-	void modificar_posicion(char);
+	void modificar_posicion(const char*);
 	void comprobar_colisiones_fantasmas();
 	void actualizar_fantasmas();
 	void crear_frutas();
@@ -70,13 +68,13 @@ private:
 	bool posicion_valida(const Pieza&);
 	void crear_disenio();
 public:
-	Game(FILE*);
+	Game();
 
 	friend std::ostream& operator<<(std::ostream&, const Game&);
 
 	void actualizar(char*, char);
 	bool murio() { return vidas < 1; }
-	auto get_puntuacion() const { return puntuacion; }
+	size_t get_puntuacion() const { return puntuacion; }
 };
 
 void Game::llenar_mapa(const Pieza& p) {
@@ -100,11 +98,12 @@ void Game::fill_columna(std::size_t _inicio, std::size_t _final, std::size_t _co
 }
 
 void Game::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
+  std::size_t i, j;
+
   pos = {pos.first, pos.second};
 
   m_map.at(pos.first).at(pos.second) = Piezas.at(Tipo_Pieza::IN_ABAJO_DERECHA);
 
-  std::size_t i, j;
 
   for (i = pos.first + 1; i < (pos.first + h - 1); i++) {
     m_map.at(i).at(pos.second) = Piezas.at(Tipo_Pieza::PARED_VERTICAL);
@@ -118,29 +117,40 @@ void Game::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   }
   m_map.at(pos.first).at(j) = Piezas.at(Tipo_Pieza::IN_ABAJO_IZQUIERDA);
   m_map.at(pos.first + h - 1).at(j) = Piezas.at(Tipo_Pieza::IN_ARRIBA_IZQUIERDA);
+
+	for (i = pos.first + 1; i < (pos.first + h - 1); i++) {
+    for (j = pos.second + 1; j < (pos.second + w - 1); j++) {
+      m_map.at(i).at(j) = Piezas.at(Tipo_Pieza::VACIO);
+    }
+  }
 }
 
-void Game::modificar_posicion(char k) {
-	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
+void Game::modificar_posicion(const char* k) {	
+	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(*k)) {
 		pacman.set_pos({14, COLUMNAS_SIZE-1});
 	}
 
-	else if (pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(k)) {
+	else if (pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(*k)) {
 		pacman.set_pos({14, 0});
 	}
 
-	else if (MOVER_ARRIBA(k))    { pacman.set_pos(pacman.pos.first-1, pacman.pos.second); }
-	else if (MOVER_ABAJO(k))     { pacman.set_pos(pacman.pos.first+1, pacman.pos.second); }
-	else if (MOVER_DERECHA(k))   { pacman.set_pos(pacman.pos.first, pacman.pos.second+1); }
-	else if (MOVER_IZQUIERDA(k)) { pacman.set_pos(pacman.pos.first, pacman.pos.second-1); }
+	else if (MOVER_ARRIBA(*k))    { pacman.set_pos(pacman.pos.first-1, pacman.pos.second); }
+	else if (MOVER_ABAJO(*k))     { pacman.set_pos(pacman.pos.first+1, pacman.pos.second); }
+	else if (MOVER_DERECHA(*k))   { pacman.set_pos(pacman.pos.first, pacman.pos.second+1); }
+	else if (MOVER_IZQUIERDA(*k)) { pacman.set_pos(pacman.pos.first, pacman.pos.second-1); }
 }
 
 void Game::comprobar_colisiones_fantasmas() {
 	for (const auto& f : fantasmas) {
-		if (f->pos == pacman.pos) {
+		if (f->pos == pacman.pos && !f->huyendo) {
 			pacman.pos = pacman_init_pos;
 			vidas--;
 			break;
+		}
+		
+		if (f->huyendo && pacman.pos == f->pos) {
+			f->pos = f->init_pos;
+			puntuacion += 500;
 		}
 	}
 }
@@ -148,339 +158,29 @@ void Game::comprobar_colisiones_fantasmas() {
 void Game::actualizar_fantasmas() {
 	mover_fantasma++;
 	if ((mover_fantasma % TIMER_MOV_FANTASMAS) == 0) {
-		for (std::size_t i = 0; i < fantasmas.size(); i++) {
-			fantasmas[i]->mover(pacman, m_map);
+		for (auto& f : fantasmas) {
+			f->mover(pacman, m_map);
 		}
 	}
 }
 
 void Game::crear_frutas() { 
-	m_map.at(3).at(1) = Piezas.at(Tipo_Pieza::FRUTA);
-	m_map.at(3).at(1) = Piezas.at(Tipo_Pieza::FRUTA);
-	m_map.at(2).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(2).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(2).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(1).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(2).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(9).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(10).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(12).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(13).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(15).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(16).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(18).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(19).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(2).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(9).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(10).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(12).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(13).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(15).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(16).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(18).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(19).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(2).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(3).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(4).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(5).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(9).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(10).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(9).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(10).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(11).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(10).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(9).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(6).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(7).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(8).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(12).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(12).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(13).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(13).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(15).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(15).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(16).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(16).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(18).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(18).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(17).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(19).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(19).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(0) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(14).at(27) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(27).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(28).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	
-	m_map.at(29).at(1) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(2) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(3) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(4) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(5) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(6) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(21) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(29).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(28).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(27).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(22) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(23) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(28).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(27).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(9) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(8) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(7) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(10) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(11) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(13) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(14) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(19) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(20) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(20).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(12) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(27).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(28).at(15) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(16) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(17) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(26).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(18) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(22).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(21).at(26) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(25) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(23).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(24).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
-	m_map.at(25).at(24) = Piezas.at(Tipo_Pieza::PUNTOS);
+	auto is = [&](std::size_t i, std::size_t j, Tipo_Pieza pieza) {
+		return m_map.at(i).at(j) == Piezas.at(pieza);
+	};
 
+	for (std::size_t i = 0; i < filas; i++) {
+		for (std::size_t j = 0; j < columnas; j++) {
+			if (is(i, j, Tipo_Pieza::VACIO)) {
+				m_map.at(i).at(j) = Piezas.at(Tipo_Pieza::PUNTOS);
+			}
+		}
+	}
+	
+	m_map.at(23).at(1)  = Piezas.at(Tipo_Pieza::FRUTA);
+	m_map.at(23).at(26) = Piezas.at(Tipo_Pieza::FRUTA);
+	m_map.at(3).at(1)   = Piezas.at(Tipo_Pieza::FRUTA);
+	m_map.at(3).at(26)  = Piezas.at(Tipo_Pieza::FRUTA);
 }
 
 void Game::comprobar_colisiones_fruta() {
@@ -489,15 +189,30 @@ void Game::comprobar_colisiones_fruta() {
 	};
 	
 	if (is_hitting(Tipo_Pieza::FRUTA)) {
+		srand(time(0));
+
+		bool fruta_trampa = ((rand() % 4) == 0);
 		puntuacion += 300;
-		fprintf(m_puntos, "Puntos: %llu", puntuacion);
 		m_map.at(pacman.pos.first).at(pacman.pos.second) = Piezas.at(Tipo_Pieza::VACIO);
 
-		for (auto& f : fantasmas) {
-			f->huyendo = true;
-		}
+		if (fruta_trampa) {
+			system("pause");
+			for (auto& f : fantasmas) {
+				f->enojado = true;
+				f->reset_timer = 40;
+			}
 
-		TIMER_MOV_FANTASMAS = 3;
+			TIMER_MOV_FANTASMAS = 1;
+		} else {
+			for (auto& f : fantasmas) {
+				f->huyendo = true;
+				f->reset_timer = 40;
+			}
+
+			TIMER_MOV_FANTASMAS = 3;
+		}
+		 
+
 	}
 
 	else if (is_hitting(Tipo_Pieza::PUNTOS)) {
@@ -506,11 +221,14 @@ void Game::comprobar_colisiones_fruta() {
 	}
 
 	for (auto& f : fantasmas) {
-		f->resetear();
+		bool reset = f->resetear();
+		if (reset) {
+			TIMER_MOV_FANTASMAS = 2;
+		}
 	}
 }
 
-Game::Game(FILE* f) : m_puntos(f) {
+Game::Game() {
 	pacman.pos = pacman_init_pos;
 	pacman.prev_pos = pacman.pos;
 	
@@ -533,8 +251,8 @@ Game::Game(FILE* f) : m_puntos(f) {
 	m_map.at(filas-1).at(columnas-1) = Piezas.at(Tipo_Pieza::IN_ARRIBA_IZQUIERDA);
 	m_map.at(0).at(columnas-1)       = Piezas.at(Tipo_Pieza::IN_ABAJO_IZQUIERDA);
 
-	crear_disenio();
 	crear_frutas();
+	crear_disenio();
 }
 
 void Game::crear_disenio() {
@@ -563,7 +281,7 @@ void Game::crear_disenio() {
 
 	// pared vertical parte de arriba
 	const auto first_pos = (columnas/2)-1;
-	crear_rectangulo({0, first_pos}, 2, 4);
+	crear_rectangulo({0, first_pos}, 2, 5);
 	m_map.at(0).at(first_pos)   = Piezas.at(Tipo_Pieza::IN_ABAJO_IZQUIERDA);
 	m_map.at(0).at(first_pos+1) = Piezas.at(Tipo_Pieza::IN_ABAJO_DERECHA);
 
@@ -672,7 +390,7 @@ bool Game::posicion_valida(const Pieza& p) {
 void Game::actualizar(char* k, char anterior) {
 	const auto old_position = pacman.pos;
 
-	modificar_posicion(*k);
+	modificar_posicion(k);
 
 	const auto& pieza = m_map.at(pacman.pos.first).at(pacman.pos.second); 
 
@@ -689,13 +407,12 @@ void Game::actualizar(char* k, char anterior) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Game& m) {
-	system("cls");
-		
+	const auto offset_x = obtener_centro_consola().first;
+
 #ifdef DEBUG
 	gotoxy(0, 0);
 	os << "Pacman coords: {" << m.pacman.pos.first << ", " << m.pacman.pos.second << "}";
 #endif // DEBUG
-	const auto offset_x = obtener_centro_consola().first;
 	
 	bool habia_fantasma = false;
 

@@ -31,7 +31,7 @@ struct Pieza {
 	Pieza()                               : m_sprite('\0'), m_color("") {}
 	Pieza(const Pieza& p)                 : m_sprite(p.m_sprite), m_color(p.m_color) {}
 	Pieza(char sprite, const char* color) : m_sprite(sprite), m_color(color) {}
-	Pieza(char sprite) : m_sprite(sprite), m_color(color.reset) {}
+	Pieza(char sprite)                    : m_sprite(sprite), m_color(color.reset) {}
 
 	Pieza& operator=(const Pieza& p) { m_sprite = p.m_sprite; m_color  = p.m_color; return *this;	}
 
@@ -58,8 +58,8 @@ const std::map<Tipo_Pieza, Pieza> Piezas = {
 
 	{Tipo_Pieza::BARRERA, Pieza(static_cast<char>(205), color.reset)},
 	
-	{Tipo_Pieza::PUNTOS, Pieza(static_cast<char>('*'), color.white)},
+	{Tipo_Pieza::PUNTOS, Pieza(static_cast<char>('.'), color.white)},
 	{Tipo_Pieza::VACIO,  Pieza(static_cast<char>(' '), color.black)},
 	{Tipo_Pieza::PACMAN, Pieza(static_cast<char>(002), color.yellow)},
-	{Tipo_Pieza::FRUTA,  Pieza(static_cast<char>(220), color.red)},
+	{Tipo_Pieza::FRUTA,  Pieza(static_cast<char>(254), color.red)},
 };

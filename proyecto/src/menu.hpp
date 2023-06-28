@@ -49,16 +49,19 @@ void menu_opciones() {
 	};
 
 	while (1) {
-		system("cls");
 		if (kbhit()) {
 			input_key = static_cast<char>(getch());
 
 			if (input_key == ESC) {
+				system("cls");
 				return;
 			}
 
 			if (input_key == ENTER) {
-				if (n == controles.size()) { return; }
+				if (n == controles.size()) { 
+					system("cls");
+					return; 
+				}
 				std::cout << "Ingrese una tecla: ";
 				char key = '\0';
 
@@ -86,7 +89,7 @@ void menu_opciones() {
 				continue;
 		  }
 
-	    std::cout << controles[i].first << "   \"" << controles[i].second << "\"";
+	    std::cout << controles[i].first << "   \"" << controles[i].second << "\"  ";
 		}
 		
 		gotoxy(offset_x, offset_y + controles.size());
@@ -94,50 +97,23 @@ void menu_opciones() {
 		if (n == controles.size()) {
 			std::cout << " [ VOLVER ] ";
 		} else {
-			std::cout << "   VOLVER";
+			std::cout << "   VOLVER   ";
 		}
 
 		Sleep(__TIMER);
 	}
 }
 
-void mostrar_menu(size_t opcion) {
-	const auto console_coords = obtener_centro_consola();
-
-	const auto& offset_x = console_coords.first;
-	const auto& offset_y = console_coords.second;
-
-	std::vector<std::string> opciones = {
-		"Jugar", 
-		"Opciones", 
-		"Salir",
-	};
-
-	for (std::size_t i = 0; i < opciones.size(); i++) {
-	  gotoxy(offset_x, offset_y + i);
-
-	  if (i == opcion) {
-      std::cout << " [ " << opciones[i] << " ] ";
-			continue;
-	  }
-
-    std::cout << "   " << opciones[i] << "   ";
-	}
-}
-
-bool menu(Game* juego) {
+bool menu(const Game* juego) {
 	char input_key = '\0';
 	static size_t n = 0;
-	system("cls");
 
 	if (kbhit()) {
 		input_key = static_cast<char>(getch());
 
 		if (input_key == ESC) {
 			salida:
-			system("cls");
-			std::cout << "Gracias por jugar!\n";
-			salir(*&juego);
+			salir(juego);
 		}
 
 		if (input_key == ARRIBA && n > 0)     { n--; } 
@@ -155,7 +131,27 @@ bool menu(Game* juego) {
 		}
 	}
 
-	mostrar_menu(n);
+	const auto console_coords = obtener_centro_consola();
+
+	const auto& offset_x = console_coords.first;
+	const auto& offset_y = console_coords.second;
+
+	std::vector<std::string> opciones = {
+		"Jugar", 
+		"Opciones", 
+		"Salir",
+	};
+
+	for (std::size_t i = 0; i < opciones.size(); i++) {
+	  gotoxy(offset_x, offset_y + i);
+
+	  if (i == n) {
+      std::cout << " [ " << opciones[i] << " ] ";
+			continue;
+	  }
+
+    std::cout << "   " << opciones[i] << "   ";
+	}
 
 	Sleep(__TIMER);
 

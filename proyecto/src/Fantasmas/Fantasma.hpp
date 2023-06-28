@@ -23,11 +23,13 @@ class Fantasma {
 	char          m_sprite;
 	std::size_t   timer_salida = 3;
 	bool          barrera_activa = false;
-	std::size_t   reset_timer = 80;
 public:
+	std::size_t   reset_timer = 40;
 	Coords_t pos;
+	Coords_t init_pos;
 	std::size_t contador_movimientos_salida = 3;
 	bool huyendo = false;
+	bool enojado = false;
 public:
 	Fantasma();
 	Fantasma(const Fantasma&);
@@ -36,12 +38,12 @@ public:
 	virtual std::string get_color() const = 0;
 
 	Fantasma& operator=(const Fantasma&);
-	void resetear();
+	bool resetear();
 	void mover(const PacMan&, Mapa_t&);
 
 	friend std::ostream& operator<<(std::ostream&, const Fantasma&);
 protected:
-	virtual void _M_mover(const PacMan&) = 0;
+	virtual void seguir_pacman(const PacMan&) = 0;
 
 	static Coords_t _MoverRandom(Coords_t, int);
 	static Coords_t _MoverFantasma(Coords_t, Coords_t, Coords_t);
@@ -52,30 +54,37 @@ protected:
 
 Fantasma::Fantasma() = default;
 
-Fantasma::Fantasma(const Fantasma& p) 
-	: m_sprite(p.m_sprite), pos(p.pos) {}
+Fantasma::Fantasma(const Fantasma& p) : m_sprite(p.m_sprite), pos(p.pos) { 
+	init_pos = p.init_pos;
+}
 
-Fantasma::Fantasma(char sprite, Coords_t pos) 
-	: m_sprite(sprite), pos(pos) {}
+Fantasma::Fantasma(char sprite, Coords_t pos) : m_sprite(sprite), pos(pos) { 
+	init_pos = pos;
+}
 
-Fantasma& Fantasma::operator=(const Fantasma& p) { m_sprite = p.m_sprite; return *this; }
+Fantasma& Fantasma::operator=(const Fantasma& p) { 
+	m_sprite = p.m_sprite;
+	return *this;
+}
 
 std::ostream& operator<<(std::ostream& os, const Fantasma& p) { 
-	const auto f_color = (p.huyendo) ? color.blue : p.get_color();
-	
+	const auto f_color = (p.huyendo) ? color.cyan : (p.enojado) ? color.red : p.get_color();
 	return os << f_color << p.m_sprite; 
 }
 
-void Fantasma::resetear() {
-	if (huyendo && reset_timer == 1) {
-		reset_timer = 80;
+bool Fantasma::resetear() {
+	if ((huyendo || enojado) && reset_timer == 1) {
+		reset_timer = 40;
 		huyendo = false;
-		return;
+		enojado = false;
+		return true;
 	}
 
-	if (huyendo) {
+	if (huyendo || enojado) {
 		reset_timer--;
 	}
+
+	return false;
 }
 
 void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
@@ -103,7 +112,7 @@ void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
 			}
 		}
 
-		_M_mover(p);
+		seguir_pacman(p);
 	}
 
 	corregir_posicion(ultima_posicion, mapa);
@@ -111,7 +120,10 @@ void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
 
 void Fantasma::corregir_posicion(const Coords_t& ultima_posicion, const Mapa_t& mapa) {
 	auto pos_invalida = [](const Pieza& p) {
-		return p != Piezas.at(Tipo_Pieza::PACMAN) && p != Piezas.at(Tipo_Pieza::PUNTOS) && p != Piezas.at(Tipo_Pieza::VACIO);
+		return 
+		p != Piezas.at(Tipo_Pieza::PACMAN) && 
+		p != Piezas.at(Tipo_Pieza::PUNTOS) && 
+		p != Piezas.at(Tipo_Pieza::VACIO);
 	};
 	
 	Pieza pieza = mapa.at(pos.first).at(pos.second);
