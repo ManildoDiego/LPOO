@@ -6,6 +6,7 @@
 #include "Pieza.hpp"
 #include "PacMan.hpp"
 #include "manejo_consola.hpp"
+#include "puntuacion.hpp"
 
 extern "C" {
 	#include <time.h>
@@ -38,7 +39,7 @@ struct Game {
 	using Coords_t = std::pair<int64_t, int64_t>;
 	PacMan pacman;
 private:
-	const char* name_file = "Puntaje.txt";
+	const std::size_t max_puntuacion;
 	Mapa_t m_map{};
 
 	const Coords_t pacman_init_pos = {17, 13};
@@ -69,6 +70,7 @@ private:
 	void crear_disenio();
 public:
 	Game();
+	~Game();
 
 	friend std::ostream& operator<<(std::ostream&, const Game&);
 
@@ -127,17 +129,17 @@ void Game::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
 
 void Game::modificar_posicion(const char* k) {	
 	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(*k)) {
-		pacman.set_pos({14, COLUMNAS_SIZE-1});
+		pacman.setPos({14, COLUMNAS_SIZE-1});
 	}
 
 	else if (pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(*k)) {
-		pacman.set_pos({14, 0});
+		pacman.setPos({14, 0});
 	}
 
-	else if (MOVER_ARRIBA(*k))    { pacman.set_pos(pacman.pos.first-1, pacman.pos.second); }
-	else if (MOVER_ABAJO(*k))     { pacman.set_pos(pacman.pos.first+1, pacman.pos.second); }
-	else if (MOVER_DERECHA(*k))   { pacman.set_pos(pacman.pos.first, pacman.pos.second+1); }
-	else if (MOVER_IZQUIERDA(*k)) { pacman.set_pos(pacman.pos.first, pacman.pos.second-1); }
+	else if (MOVER_ARRIBA(*k))    { pacman.setPos(pacman.pos.first-1, pacman.pos.second); }
+	else if (MOVER_ABAJO(*k))     { pacman.setPos(pacman.pos.first+1, pacman.pos.second); }
+	else if (MOVER_DERECHA(*k))   { pacman.setPos(pacman.pos.first, pacman.pos.second+1); }
+	else if (MOVER_IZQUIERDA(*k)) { pacman.setPos(pacman.pos.first, pacman.pos.second-1); }
 }
 
 void Game::comprobar_colisiones_fantasmas() {
@@ -196,7 +198,6 @@ void Game::comprobar_colisiones_fruta() {
 		m_map.at(pacman.pos.first).at(pacman.pos.second) = Piezas.at(Tipo_Pieza::VACIO);
 
 		if (fruta_trampa) {
-			system("pause");
 			for (auto& f : fantasmas) {
 				f->enojado = true;
 				f->reset_timer = 40;
@@ -211,8 +212,6 @@ void Game::comprobar_colisiones_fruta() {
 
 			TIMER_MOV_FANTASMAS = 3;
 		}
-		 
-
 	}
 
 	else if (is_hitting(Tipo_Pieza::PUNTOS)) {
@@ -228,7 +227,7 @@ void Game::comprobar_colisiones_fruta() {
 	}
 }
 
-Game::Game() {
+Game::Game() : max_puntuacion(leerPuntuacion()) {
 	pacman.pos = pacman_init_pos;
 	pacman.prev_pos = pacman.pos;
 	
@@ -253,6 +252,15 @@ Game::Game() {
 
 	crear_frutas();
 	crear_disenio();
+}
+
+Game::~Game() {
+	if (puntuacion > max_puntuacion) {
+		guardarPuntuacion(puntuacion);
+		system("cls");
+		std::cout << "Nueva maxima puntuacion!: " << puntuacion << std::endl;
+		std::cin.get();
+	}
 }
 
 void Game::crear_disenio() {
@@ -395,7 +403,7 @@ void Game::actualizar(char* k, char anterior) {
 	const auto& pieza = m_map.at(pacman.pos.first).at(pacman.pos.second); 
 
 	if (!posicion_valida(pieza)) {
-		pacman.set_pos(old_position, true);
+		pacman.setPos(old_position, true);
 		*k = anterior;
 		actualizar_fantasmas();
 		return;
@@ -409,16 +417,18 @@ void Game::actualizar(char* k, char anterior) {
 std::ostream& operator<<(std::ostream& os, const Game& m) {
 	const auto offset_x = obtener_centro_consola().first;
 
-#ifdef DEBUG
-	gotoxy(0, 0);
-	os << "Pacman coords: {" << m.pacman.pos.first << ", " << m.pacman.pos.second << "}";
-#endif // DEBUG
+// #ifdef DEBUG
+// 	gotoxy(0, 0);
+// 	os << "Pacman coords: {" << m.pacman.pos.first << ", " << m.pacman.pos.second << "}";
+// #endif // DEBUG
 	
 	bool habia_fantasma = false;
+
 
 	for (std::size_t i = 0; i < m.filas; i++) {
 		gotoxy(offset_x, i);
 		for (std::size_t j = 0; j < m.columnas; j++) {
+
 			for (const auto& f : m.fantasmas) {
 				if (f->pos == Coords_t{i, j}) {
 					os << *f;
@@ -442,6 +452,8 @@ std::ostream& operator<<(std::ostream& os, const Game& m) {
 		os << '\n';
 	}
 
+
+	
 	gotoxy(offset_x, m.filas);
 	for (std::size_t i = 0; i < m.vidas; i++) {
 		os << m.pacman << ' ';
@@ -449,6 +461,9 @@ std::ostream& operator<<(std::ostream& os, const Game& m) {
 
 	gotoxy(offset_x+m.columnas, 0);
 	os << color.magenta << "Puntos: " << m.puntuacion;
+
+	gotoxy(offset_x+m.columnas, 3);
+	os << color.blue << "Maxima puntuacion: " << m.max_puntuacion;
 
 	os << color.reset;
 

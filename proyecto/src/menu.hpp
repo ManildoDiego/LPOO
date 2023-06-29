@@ -27,6 +27,18 @@ std::vector<Tecla_t> controles = {
 	{"IZQUIERDA", 'a'},
 };
 
+void salir() {
+	system("cls");
+
+	std::cout << "Gracias por jugar!\n";
+	std::cout << color.magenta << "Creditos:\n";
+	std::cout << color.green << "\tManildo Diego    " << color.reset << "-> programador\n";
+	std::cout << color.red   << "\tFransico Tumulty " << color.reset << "-> diseniador grafico\n";
+	std::cout << color.blue  << "\tJoaquin Pagano   " << color.reset << "-> diseniador y programador\n";
+
+	exit(0);
+}
+
 void menu_opciones() {
 	char input_key = '\0';
 	size_t n = 0;
@@ -58,8 +70,8 @@ void menu_opciones() {
 			}
 
 			if (input_key == ENTER) {
+				system("cls");
 				if (n == controles.size()) { 
-					system("cls");
 					return; 
 				}
 				std::cout << "Ingrese una tecla: ";
@@ -67,6 +79,7 @@ void menu_opciones() {
 
 				do {
 					key = static_cast<char>(getch());
+					system("cls");
 				} while (iscntrl(key) || isdigit(key) || esta_en_controles(key, controles.at(n)));
 				
 				controles.at(n).second = key;
@@ -104,29 +117,49 @@ void menu_opciones() {
 	}
 }
 
-bool menu(const Game* juego) {
+#define ESC   static_cast<char>(27)
+#define ENTER static_cast<char>(13)
+
+bool menu() {
+	static std::vector<std::string> opciones = {
+		"Jugar", 
+		"Opciones", 
+		"Ver maxima puntuacion",
+		"Salir",
+	};
+	static std::size_t n = 0;
+
 	char input_key = '\0';
-	static size_t n = 0;
 
 	if (kbhit()) {
 		input_key = static_cast<char>(getch());
 
 		if (input_key == ESC) {
 			salida:
-			salir(juego);
+			salir();
 		}
 
-		if (input_key == ARRIBA && n > 0)     { n--; } 
-		else if (input_key == ABAJO && n < 2) { n++; }
+		if (input_key == ARRIBA && n > 0) { 
+			n--; 
+		} 
+		else if (input_key == ABAJO && n < (opciones.size()-1)) { 
+			n++; 
+		}
 	}
 
 	if (input_key == ENTER) {
+		system("cls");
 		switch (n) {
 			case 0: return true;
 			case 1: menu_opciones(); break;
-			case 2: goto salida;     break;
+			case 2:
+				std::cout << "Maxima puntuacion: " << leerPuntuacion() << std::endl;
+				std::cin.get();
+				system("cls");
+				break;
+			case 3: goto salida; break;
 			default:
-				throw std::invalid_argument("Opcion invalida (0-2) -> " + std::to_string(n));
+				throw std::invalid_argument("Opcion invalida (0-3) -> " + std::to_string(n));
 				break;
 		}
 	}
@@ -135,12 +168,6 @@ bool menu(const Game* juego) {
 
 	const auto& offset_x = console_coords.first;
 	const auto& offset_y = console_coords.second;
-
-	std::vector<std::string> opciones = {
-		"Jugar", 
-		"Opciones", 
-		"Salir",
-	};
 
 	for (std::size_t i = 0; i < opciones.size(); i++) {
 	  gotoxy(offset_x, offset_y + i);
