@@ -5,7 +5,7 @@ extern "C" {
 	#include <conio.h>
 }
 
-#define TICK_RATE 150
+#define TICK_RATE 100
 #define ESC   static_cast<char>(27)
 #define ENTER static_cast<char>(13)
 
