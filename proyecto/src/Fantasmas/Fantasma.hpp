@@ -10,24 +10,24 @@ extern "C" {
 	#include <time.h>
 }
 
+#include "../Mapa.hpp"
 #include "../PacMan.hpp"
 #include "../Pieza.hpp"
 
 #define FILAS_SIZE 31
 #define COLUMNAS_SIZE 28
 
-using Mapa_t   = std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE>;
 using Coords_t = std::pair<int64_t, int64_t>;
 
 class Fantasma {
 	char          _sprite;
-	std::size_t   _timer_salida = 3;
-	bool          _barrera_activa = false;
+	std::size_t   _timerSalida = 3;
+	bool          _barreraActiva = false;
 public:
-	std::size_t   reset_timer = 40;
+	std::size_t   resetTimer = 40;
 	Coords_t      pos;
-	Coords_t      init_pos;
-	std::size_t   contador_movimientos_salida = 3;
+	Coords_t      initPos;
+	std::size_t   contadorMovimientosSalida = 3;
 	bool          huyendo = false;
 	bool          enojado = false;
 public:
@@ -56,11 +56,11 @@ protected:
 Fantasma::Fantasma() = default;
 
 Fantasma::Fantasma(const Fantasma& p) : _sprite(p._sprite), pos(p.pos) { 
-	init_pos = p.init_pos;
+	initPos = p.initPos;
 }
 
 Fantasma::Fantasma(char sprite, Coords_t pos) : _sprite(sprite), pos(pos) { 
-	init_pos = pos;
+	initPos = pos;
 }
 
 Fantasma& Fantasma::operator=(const Fantasma& p) { 
@@ -77,8 +77,8 @@ std::ostream& operator<<(std::ostream& os, const Fantasma& p) {
 
 bool Fantasma::resetear() {
 	// si esta huyendo o enojado y el timer esta a 1 resetea el timer 
-	if ((huyendo || enojado) && reset_timer == 1) {
-		reset_timer = 40;
+	if ((huyendo || enojado) && resetTimer == 1) {
+		resetTimer = 40;
 		huyendo = false;
 		enojado = false;
 		return true;
@@ -86,7 +86,7 @@ bool Fantasma::resetear() {
 
 	// si no, si esta huyendo o enojado, disminuyo el timer
 	if (huyendo || enojado) {
-		reset_timer--;
+		resetTimer--;
 	}
 
 	return false;
@@ -101,18 +101,18 @@ void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
 		return;
 	}
 	
-	if (_timer_salida > 0) {
-		_timer_salida--;
+	if (_timerSalida > 0) {
+		_timerSalida--;
 		return;
 	} 
 	
 	const auto ultima_posicion = pos;
 
-	if (contador_movimientos_salida > 0) {
-		contador_movimientos_salida--;
+	if (contadorMovimientosSalida > 0) {
+		contadorMovimientosSalida--;
 		pos.first--;
 	} else {
-		if (!_barrera_activa) {
+		if (!_barreraActiva) {
 			for (std::size_t j = 12; j <= 15; j++) {
 				mapa.at(12).at(j) = Piezas.at(Tipo_Pieza::BARRERA);
 			}

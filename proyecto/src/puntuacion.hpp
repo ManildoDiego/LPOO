@@ -93,7 +93,7 @@ std::string leerNombre() {
 		// lo creo
 		archivo = fopen(puntajeFileName, "w+");
 	  fclose(archivo);
-		guardarNombre("");
+		guardarNombre(" ");
 
 		system("cls");
 		std::cout << "Archivo creado!";

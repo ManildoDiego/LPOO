@@ -19,34 +19,50 @@ extern "C" {
 #define ESC   static_cast<char>(27)
 #define ENTER static_cast<char>(13)
 
-// declaro que Tecla_t = std::pair<const char*, char>
-using Tecla_t = std::pair<const char*, char>;
+// declaro que Tecla_t = std::pair<std::string, char>
+using Tecla_t = std::pair<std::string, char>;
 
 std::vector<Tecla_t> controles = {
-	{"ARRIBA   ", 'w'},
-	{"ABAJO    ", 's'},
-	{"DERECHA  ", 'd'},
-	{"IZQUIERDA", 'a'},
+	{color.red     + std::string("ARRIBA   ") + color.reset, 'w'},
+	{color.magenta + std::string("ABAJO    ") + color.reset, 's'},
+	{color.cyan    + std::string("DERECHA  ") + color.reset, 'd'},
+	{color.orange  + std::string("IZQUIERDA") + color.reset, 'a'},
 };
 
 // funcion de salir y creditos
 void salir() {
 	system("cls");
 
+	const auto coords = obtener_centro_consola();
+	gotoxy(coords);
 	std::cout << "Gracias por jugar!\n";
+	gotoxy(coords.first, coords.second + 1);
 	std::cout << color.magenta << "Creditos:\n";
+	gotoxy(coords.first, coords.second + 2);
 	std::cout << color.green << "\tManildo Diego    " << color.reset << "-> programador\n";
+	gotoxy(coords.first, coords.second + 3);
 	std::cout << color.red   << "\tFransico Tumulty " << color.reset << "-> diseniador grafico\n";
+	gotoxy(coords.first, coords.second + 4);
 	std::cout << color.blue  << "\tJoaquin Pagano   " << color.reset << "-> diseniador y programador\n";
 
 	exit(0);
 }
 
-void menu_opciones() {
-	char input_key = '\0';
+// funcion perdio
+void perdio() {
+	system("cls");
+
+	gotoxy(obtener_centro_consola());
+	std::cout << "Perdiste!";
+	std::cin.get();
+	salir();
+}
+
+void menuControles() {
+	char inputKey = '\0';
 	size_t n = 0;
 
-	auto esta_en_controles = [&n](char k, Tecla_t actual) {
+	auto esta_en_controles = [](char k, Tecla_t actual) {
 		if (actual.second == k) {
 			system("cls");
 			return false;
@@ -65,14 +81,14 @@ void menu_opciones() {
 
 	while (1) {
 		if (kbhit()) {
-			input_key = static_cast<char>(getch());
+			inputKey = static_cast<char>(getch());
 
-			if (input_key == ESC) {
+			if (inputKey == ESC) {
 				system("cls");
 				return;
 			}
 
-			if (input_key == ENTER) {
+			if (inputKey == ENTER) {
 				system("cls");
 				if (n == controles.size()) { 
 					return; 
@@ -88,8 +104,8 @@ void menu_opciones() {
 				controles.at(n).second = key;
 			}
 
-			if (input_key == ARRIBA && n > 0)     { n--; } 
-			else if (input_key == ABAJO && n < controles.size()) { n++; }
+			if (inputKey == ARRIBA && n > 0)     { n--; } 
+			else if (inputKey == ABAJO && n < controles.size()) { n++; }
 		}
 
 		const auto console_coords = obtener_centro_consola();
@@ -110,11 +126,9 @@ void menu_opciones() {
 		
 		gotoxy(offset_x, offset_y + controles.size());
 		
-		if (n == controles.size()) {
-			std::cout << " [ VOLVER ] ";
-		} else {
-			std::cout << "   VOLVER   ";
-		}
+		(n == controles.size())
+			? std::cout << " [ VOLVER ] "
+			: std::cout << "   VOLVER   ";
 
 		Sleep(20);
 	}
@@ -123,50 +137,73 @@ void menu_opciones() {
 bool menu() {
 	// menu de opciones
 	static std::vector<std::string> opciones = {
-		"Jugar", 
-		"Opciones", 
-		"Ver maxima puntuacion",
-		"Salir",
+		color.green   + std::string("Jugar")                 + color.reset, 
+		color.magenta + std::string("Opciones")              + color.reset, 
+		color.cyan    + std::string("Ver maxima puntuacion") + color.reset,
+		color.orange  + std::string("Resetear puntuacion")   + color.reset,
+		color.red     + std::string("Salir")                 + color.reset,
 	};
 	
 	static std::size_t n = 0;
 
-	char input_key = '\0';
+	char inputKey = '\0';
 
 	if (kbhit()) {
-		input_key = static_cast<char>(getch());
+		inputKey = static_cast<char>(getch());
 
-		if (input_key == ESC) {
+		if (inputKey == ESC) {
 			salida:
 			salir();
 		}
 
-		if (input_key == ARRIBA && n > 0) { 
+		if (inputKey == ARRIBA && n > 0) { 
 			n--; 
 		} 
-		else if (input_key == ABAJO && n < (opciones.size()-1)) { 
+		else if (inputKey == ABAJO && n < (opciones.size()-1)) { 
 			n++; 
 		}
 	}
 
-	if (input_key == ENTER) {
+	if (inputKey == ENTER) {
 		system("cls");
 		switch (n) {
 			case 0: 
+				// retorna true (ya puede empezar a jugar)
 				return true;
 			case 1: 
-				menu_opciones();
+				// va a al menu de controles
+				menuControles();
 				break;
-			case 2:
-				std::cout << "Maxima puntuacion: " << leerPuntuacion() << std::endl;
-				std::cout << "Hecha por: \"" << leerNombre() << "\"\n";
+			case 2: {
+				// 
+				const auto coords = obtener_centro_consola();
+				gotoxy(coords);
+				auto p = leerPuntuacion();
+				if (p != 0) {
+					std::cout << "Maxima puntuacion: " << p << std::endl;
+					gotoxy(coords.first, coords.second+1);
+					std::cout << "Hecha por: \"" << leerNombre() << "\"\n";
+				} else {
+					std::cout << "Ninguna puntuacion ha sido registrada!\n";
+				}
 				std::cin.get();
 				system("cls");
 				break;
-			case 3: 
+			}
+			case 3: 				
+				// resetea la puntuacion
+				guardarPuntuacion(0);
+				gotoxy(obtener_centro_consola());
+				std::cout << "La puntuacion ha sido reseteada!\n";
+				std::cin.get();
+				system("cls");
+				guardarNombre(" ");
+				break;
+			case 4:
 				goto salida;
 				break;
 			default:
+				// nunca deberia suceder
 				throw std::invalid_argument("Opcion invalida (0-3) -> " + std::to_string(n));
 				break;
 		}

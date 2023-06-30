@@ -8,11 +8,11 @@ struct PacMan {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
 	// pieza del pacman
-	const Pieza pieza  = Piezas.at(Tipo_Pieza::PACMAN);
+	const Pieza pieza = Piezas.at(Tipo_Pieza::PACMAN);
 	// posicion del pacman
-	Coords_t pos      = {1, 1};
+	Coords_t pos;
 	// posicion del pacman previa para que los fantasmas puedan predecir movimientos
-	Coords_t prev_pos = {1, 1};
+	Coords_t prevPos;
 	
 	// metodo set pos en base a coordenadas
 	void setPos(const Coords_t&, bool);
@@ -25,7 +25,7 @@ struct PacMan {
 
 void PacMan::setPos(const Coords_t& new_pos, bool change = false) {
 	if (!change) {
-		prev_pos = pos;
+		prevPos = pos;
 	}
 
 	pos = new_pos;

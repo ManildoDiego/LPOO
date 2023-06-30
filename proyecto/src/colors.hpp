@@ -22,6 +22,7 @@ struct {
 	const char* cyan_bg    = "\x1B[46m";
 	const char* white_bg   = "\x1B[47m";
 	const char* reset_bg   = "\x1B[47m";
+	
 	const char* underline  = "\033[4m";
 	const char* reset      = "\033[0m";
 	const char* bold       = "\033[1m";

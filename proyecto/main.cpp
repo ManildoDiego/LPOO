@@ -22,8 +22,6 @@ inicio:
 	system("cls"); 
 	ocultar_cursor();
 
-	Game juego{};
-
 	// menu inicial
 	while (1) {
 		bool salir = menu();
@@ -32,30 +30,32 @@ inicio:
 		}
 	}
 
-	char input_key = '\0';
-	char anterior = '\0';
+	char inputKey = '\0';
 
+	Game juego{};
 	cout << juego << endl;
 	
 	// mientras no se murio, sigue el juego
 	while (!juego.murio()) {
 		// si toca el teclado, guarda la tecla
 		if (kbhit()) {
-			input_key = static_cast<char>(getch());
+			inputKey = static_cast<char>(getch());
 		}
 
 		// si toca el ESC sale del juego
-		if (input_key == ESC) {
+		if (inputKey == ESC) {
 			goto inicio;
 		}
 
 		// actualiza el tablero
-		juego.actualizar(&input_key, &anterior);
+		juego.actualizar(inputKey);
 		cout << juego << endl;
 
 		// pausa la consola
 		Sleep(TICK_RATE);
 	}
+
+	perdio();
 
 	// sale del programa
 	salir();

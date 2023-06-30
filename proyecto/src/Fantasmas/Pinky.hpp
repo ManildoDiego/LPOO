@@ -12,8 +12,8 @@ struct Pinky final : public Fantasma {
 protected:
 	// sobreescribo el metodo _SeguirPacman
 	void _SeguirPacman(const PacMan& p) override {
-		const int64_t target_x = p.pos.first + 4 * (p.pos.first - p.prev_pos.first);
-		const int64_t target_y = p.pos.second + 4 * (p.pos.second - p.prev_pos.second);
+		const int64_t target_x = p.pos.first + 4 * (p.pos.first - p.prevPos.first);
+		const int64_t target_y = p.pos.second + 4 * (p.pos.second - p.prevPos.second);
 
 		pos = _MoverFantasma(pos, pos, {target_x, target_y});
 	}
