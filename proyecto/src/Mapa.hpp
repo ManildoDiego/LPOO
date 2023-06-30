@@ -7,13 +7,13 @@
 #define FILAS_SIZE 31
 #define COLUMNAS_SIZE 28
 
-struct Mapa_t : public std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE> {
+struct Mapa : public std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE> {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
 	static const std::size_t filas    = FILAS_SIZE;
 	static const std::size_t columnas = COLUMNAS_SIZE;
 
-	Mapa_t();
+	Mapa();
 private:
 	void _LlenarFila(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void _LlenarColumna(std::size_t, std::size_t, std::size_t, const Pieza&);
@@ -22,7 +22,7 @@ private:
 	void _CrearDisenio();
 };
 
-Mapa_t::Mapa_t() {
+Mapa::Mapa() {
 	// llena el mapa de puntos
 	for (std::size_t i = 0; i < filas; i++) {
 		for (std::size_t j = 0; j < columnas; j++) {
@@ -50,19 +50,19 @@ Mapa_t::Mapa_t() {
 	_CrearDisenio();
 }
 
-void Mapa_t::_LlenarFila(std::size_t _inicio, std::size_t _final, std::size_t _fila, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
+void Mapa::_LlenarFila(std::size_t _inicio, std::size_t _final, std::size_t _fila, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
 	for (std::size_t i = _inicio; i < _final; i++) {
 		this->at(i).at(_fila) = pieza;
 	}
 }
 
-void Mapa_t::_LlenarColumna(std::size_t _inicio, std::size_t _final, std::size_t _columna, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
+void Mapa::_LlenarColumna(std::size_t _inicio, std::size_t _final, std::size_t _columna, const Pieza& pieza = Piezas.at(Tipo_Pieza::VACIO)) {
 	for (std::size_t j = _inicio; j < _final; j++) {
 		this->at(_columna).at(j) = pieza;
 	}
 }
 
-void Mapa_t::_CrearRectangulo(Coords_t pos, std::size_t w, std::size_t h) {
+void Mapa::_CrearRectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   std::size_t i, j;
 
   pos = {pos.first, pos.second};
@@ -90,14 +90,14 @@ void Mapa_t::_CrearRectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   }
 }
 
-void Mapa_t::_CrearFrutas() { 
+void Mapa::_CrearFrutas() { 
 	this->at(23).at(1)  = Piezas.at(Tipo_Pieza::FRUTA);
 	this->at(23).at(26) = Piezas.at(Tipo_Pieza::FRUTA);
 	this->at(3).at(1)   = Piezas.at(Tipo_Pieza::FRUTA);
 	this->at(3).at(26)  = Piezas.at(Tipo_Pieza::FRUTA);
 }
 
-void Mapa_t::_CrearDisenio() {
+void Mapa::_CrearDisenio() {
 	// portal izquierdo, parte de arriba
 	_CrearRectangulo({9, 0}, 6, 5);
 	_LlenarFila(9, 14, 0);

@@ -37,13 +37,13 @@ extern std::vector<std::pair<std::string, char>> controles;
 
 #define DEFAULT_SPRITE static_cast<char>(1)
 
-class Game {
+class Juego {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
 	const std::size_t _maxPuntuacion;
 	const std::string _maxNombre;
 
-	Mapa_t            _mapa{};
+	Mapa            _mapa{};
 	const Coords_t    _pacmanInitPos = {17, 13};
 
 	std::size_t _puntuacion        = 0;
@@ -65,29 +65,29 @@ class Game {
 public:
 	PacMan pacman;
 
-	Game();
-	~Game();
+	Juego();
+	~Juego();
 
-	friend std::ostream& operator<<(std::ostream&, const Game&);
+	friend std::ostream& operator<<(std::ostream&, const Juego&);
 
 	void actualizar(char);
 	bool murio() { return _vidas < 1; }
 	std::size_t getPuntuacion() const { return _puntuacion; }
 };
 
-Game::Game() : _maxPuntuacion(leerPuntuacion()), _maxNombre(leerNombre()) {
+Juego::Juego() : _maxPuntuacion(leerPuntuacion()), _maxNombre(leerNombre()) {
 	pacman.pos = _pacmanInitPos;
 	pacman.prevPos = pacman.pos;
 }
 
-Game::~Game() {
+Juego::~Juego() {
 	if (_puntuacion > _maxPuntuacion) {
 		system("cls");
 		std::string nombre{};
 		std::cout << "Nueva maxima puntuacion!: " << _puntuacion << std::endl;
 		std::cout << "Ingrese nombre del jugador: ";
 
-		while (nombre.empty() || std::all_of(nombre.begin(), nombre.end(), [](unsigned char c) { return std::isspace(c); })) {
+		while (nombre.empty() || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
       std::getline(std::cin, nombre);
     }
 
@@ -96,7 +96,7 @@ Game::~Game() {
 	}
 }
 
-void Game::_ComprobarColisionesFantasmas() {
+void Juego::_ComprobarColisionesFantasmas() {
 	for (const auto& f : _fantasmas) {
 		if (f->pos == pacman.pos && !f->huyendo) {
 			pacman.pos = _pacmanInitPos;
@@ -112,7 +112,7 @@ void Game::_ComprobarColisionesFantasmas() {
 	}
 }
 
-void Game::_ActualizarFantasmas() {
+void Juego::_ActualizarFantasmas() {
 	_moverFantasma++;
 	if ((_moverFantasma % _timerMovFantasmas) == 0) {
 		for (auto& f : _fantasmas) {
@@ -121,7 +121,7 @@ void Game::_ActualizarFantasmas() {
 	}
 }
 
-void Game::_ComprobarColisiones() {
+void Juego::_ComprobarColisiones() {
 	_ComprobarColisionesFantasmas();
 	
 	auto is_hitting = [&](Tipo_Pieza pieza) {
@@ -165,7 +165,7 @@ void Game::_ComprobarColisiones() {
 	}
 }
 
-bool Game::_PosicionValida(const Pieza& p) {
+bool Juego::_PosicionValida(const Pieza& p) {
 	return 
 		p == Piezas.at(Tipo_Pieza::PACMAN) ||
 		p == Piezas.at(Tipo_Pieza::PUNTOS) ||
@@ -173,7 +173,7 @@ bool Game::_PosicionValida(const Pieza& p) {
 		p == Piezas.at(Tipo_Pieza::FRUTA);
 }
 
-void Game::actualizar(char k) {
+void Juego::actualizar(char k) {
 	const auto old_position = pacman.pos;
 
 	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
@@ -200,16 +200,16 @@ void Game::actualizar(char k) {
 	_ComprobarColisiones();
 }
 
-std::ostream& operator<<(std::ostream& os, const Game& game) {
+std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 	const auto offset_x = obtener_centro_consola().first;
 	
 	bool habia_fantasma = false;
 
-	for (std::size_t i = 0; i < game._mapa.filas; i++) {
+	for (std::size_t i = 0; i < juego._mapa.filas; i++) {
 		gotoxy(offset_x, i);
-		for (std::size_t j = 0; j < game._mapa.columnas; j++) {
+		for (std::size_t j = 0; j < juego._mapa.columnas; j++) {
 
-			for (const auto& f : game._fantasmas) {
+			for (const auto& f : juego._fantasmas) {
 				if (f->pos == Coords_t{i, j}) {
 					os << *f;
 					habia_fantasma = true;
@@ -222,27 +222,27 @@ std::ostream& operator<<(std::ostream& os, const Game& game) {
 				continue;
 			}
 
-			if (game.pacman.pos == Coords_t{i, j}) {
-				os << game.pacman;
+			if (juego.pacman.pos == Coords_t{i, j}) {
+				os << juego.pacman;
 				continue;
 			}
 			
-			os << game._mapa.at(i).at(j);
+			os << juego._mapa.at(i).at(j);
 		}
 		os << '\n';
 	}
 
-	gotoxy(offset_x, game._mapa.filas);
-	for (std::size_t i = 0; i < game._vidas; i++) {
-		os << game.pacman << ' ';
+	gotoxy(offset_x, juego._mapa.filas);
+	for (std::size_t i = 0; i < juego._vidas; i++) {
+		os << juego.pacman << ' ';
 	}
 
-	gotoxy(offset_x+game._mapa.columnas, 0);
-	os << color.magenta << "Puntos: " << game._puntuacion;
+	gotoxy(offset_x+juego._mapa.columnas, 0);
+	os << color.magenta << "Puntos: " << juego._puntuacion;
 
-	if (game._maxPuntuacion != 0) {
-		gotoxy(offset_x+game._mapa.columnas, 3);
-		os << color.blue << "Maxima puntuacion: " << game._maxPuntuacion << " hecha por \"" << game._maxNombre << "\"";
+	if (juego._maxPuntuacion != 0 || juego._maxNombre != "NULL") {
+		gotoxy(offset_x+juego._mapa.columnas, 3);
+		os << color.blue << "Maxima puntuacion: " << juego._maxPuntuacion << " hecha por \"" << juego._maxNombre << "\"";
 	}
 
 	os << color.reset;

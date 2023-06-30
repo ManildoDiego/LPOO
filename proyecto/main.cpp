@@ -10,7 +10,7 @@ extern "C" {
 #define ENTER static_cast<char>(13)
 
 #include "src/puntuacion.hpp"
-#include "src/Game.hpp"
+#include "src/Juego.hpp"
 
 #include "src/menu.hpp"
 
@@ -32,7 +32,7 @@ inicio:
 
 	char inputKey = '\0';
 
-	Game juego{};
+	Juego juego{};
 	cout << juego << endl;
 	
 	// mientras no se murio, sigue el juego

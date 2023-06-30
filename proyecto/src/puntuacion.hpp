@@ -10,8 +10,7 @@ const char* nombreFileName = "others/Nombre.txt";
 
 // guarda la maxima puntuacion
 void guardarPuntuacion(std::size_t puntuacion) {
-	FILE *archivo;
-	archivo = fopen(puntajeFileName, "w");
+	FILE *archivo = fopen(puntajeFileName, "w");
 	
 	if (archivo == NULL) {
 		system("cls");
@@ -25,8 +24,7 @@ void guardarPuntuacion(std::size_t puntuacion) {
 }
 
 void guardarNombre(const std::string& nombre) {
-	FILE *archivo;
-	archivo = fopen(nombreFileName, "w");
+	FILE *archivo = fopen(nombreFileName, "w");
 	
 	if (archivo == NULL) {
 		system("cls");
@@ -42,10 +40,8 @@ void guardarNombre(const std::string& nombre) {
 // leo puntuacion del archivo
 std::size_t leerPuntuacion() {
   std::size_t puntuacionMaxima;
-  FILE *archivo;
-
 	// abro el archivo en modo lectura
-  archivo = fopen(puntajeFileName, "r");
+  FILE *archivo = fopen(puntajeFileName, "r");
 
 	// si no existe el archivo, lo creo
   if (archivo == NULL) {
@@ -75,8 +71,10 @@ std::size_t leerPuntuacion() {
   return puntuacionMaxima;
 }
 
+#define __CHAR_BUFFER 255
+
 std::string leerNombre() {
-  char nombre[255];
+  char nombre[__CHAR_BUFFER];
   FILE *archivo;
 
 	// abro el archivo en modo lectura
@@ -93,17 +91,20 @@ std::string leerNombre() {
 		// lo creo
 		archivo = fopen(puntajeFileName, "w+");
 	  fclose(archivo);
-		guardarNombre(" ");
+		guardarNombre("NULL");
 
 		system("cls");
 		std::cout << "Archivo creado!";
 		Sleep(1000);
 		system("cls");
-		return "";
+		return "NULL";
   }
 
 	// scaneo el puntaje
-  fscanf(archivo, "%255s", nombre);
+  auto out = fgets(nombre, __CHAR_BUFFER, archivo);
+	if (out == NULL) {
+		return "NULL";
+	}
   fclose(archivo);
   return nombre;
 }

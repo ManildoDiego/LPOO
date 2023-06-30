@@ -179,10 +179,11 @@ bool menu() {
 				const auto coords = obtener_centro_consola();
 				gotoxy(coords);
 				auto p = leerPuntuacion();
-				if (p != 0) {
+				auto n = leerNombre();
+				if (p != 0 || n != "NULL") {
 					std::cout << "Maxima puntuacion: " << p << std::endl;
 					gotoxy(coords.first, coords.second+1);
-					std::cout << "Hecha por: \"" << leerNombre() << "\"\n";
+					std::cout << "Hecha por: \"" << n << "\"\n";
 				} else {
 					std::cout << "Ninguna puntuacion ha sido registrada!\n";
 				}
@@ -193,11 +194,11 @@ bool menu() {
 			case 3: 				
 				// resetea la puntuacion
 				guardarPuntuacion(0);
+				guardarNombre("NULL");
 				gotoxy(obtener_centro_consola());
 				std::cout << "La puntuacion ha sido reseteada!\n";
 				std::cin.get();
 				system("cls");
-				guardarNombre(" ");
 				break;
 			case 4:
 				goto salida;

@@ -37,7 +37,7 @@ public:
 
 	Fantasma& operator=(const Fantasma&);
 	bool resetear();
-	void mover(const PacMan&, Mapa_t&);
+	void mover(const PacMan&, Mapa&);
 
 	friend std::ostream& operator<<(std::ostream&, const Fantasma&);
 protected:
@@ -49,7 +49,7 @@ protected:
 	static Coords_t _MoverRandom(Coords_t, int);
 	static Coords_t _MoverFantasma(Coords_t, Coords_t, Coords_t);
 
-	void _CorregirPosicion(const Coords_t&, const Mapa_t&);
+	void _CorregirPosicion(const Coords_t&, const Mapa&);
 	void _Huir(const PacMan&);
 };
 
@@ -93,7 +93,7 @@ bool Fantasma::resetear() {
 }
 
 // mueve al pacman
-void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
+void Fantasma::mover(const PacMan& p, Mapa& mapa) {
 	if (huyendo) {
 		const auto ultima_posicion = pos;
 		_Huir(p);
@@ -125,7 +125,7 @@ void Fantasma::mover(const PacMan& p, Mapa_t& mapa) {
 }
 
 // corrige la posicion del pacman
-void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa_t& mapa) {
+void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa& mapa) {
 	auto pos_invalida = [](const Pieza& p) {
 		return 
 		p != Piezas.at(Tipo_Pieza::PACMAN) && 
