@@ -4,12 +4,40 @@
 #include <iostream>
 #include <windows.h>
 
+extern "C" {
+	#include <dirent.h>
+}
+
 // nombre del archivo que se va a abrir
 const char* puntajeFileName = "others/Puntaje.txt";
 const char* nombreFileName = "others/Nombre.txt";
+const char* othersdir = "others";
+
+bool existeOthers() {
+	DIR* dir = opendir(othersdir);
+	
+	if (dir) {
+		closedir(dir);
+		return true;
+	}
+
+	return false;
+}
+
+void crearOthers() {
+	mkdir(othersdir);
+}
+
+void crearOthersSiNoExiste() {
+	if (!existeOthers()) {
+		crearOthers();
+	}
+}
 
 // guarda la maxima puntuacion
 void guardarPuntuacion(std::size_t puntuacion) {
+	crearOthersSiNoExiste();
+	
 	FILE *archivo = fopen(puntajeFileName, "w");
 	
 	if (archivo == NULL) {
@@ -24,6 +52,8 @@ void guardarPuntuacion(std::size_t puntuacion) {
 }
 
 void guardarNombre(const std::string& nombre) {
+	crearOthersSiNoExiste();
+	
 	FILE *archivo = fopen(nombreFileName, "w");
 	
 	if (archivo == NULL) {
@@ -39,6 +69,8 @@ void guardarNombre(const std::string& nombre) {
 
 // leo puntuacion del archivo
 std::size_t leerPuntuacion() {
+	crearOthersSiNoExiste();
+	
   std::size_t puntuacionMaxima;
 	// abro el archivo en modo lectura
   FILE *archivo = fopen(puntajeFileName, "r");
@@ -74,6 +106,8 @@ std::size_t leerPuntuacion() {
 #define __CHAR_BUFFER 255
 
 std::string leerNombre() {
+	crearOthersSiNoExiste();
+	
   char nombre[__CHAR_BUFFER];
   FILE *archivo;
 
