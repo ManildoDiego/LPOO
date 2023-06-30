@@ -137,11 +137,11 @@ void menuControles() {
 bool menu() {
 	// menu de opciones
 	static std::vector<std::string> opciones = {
-		color.green   + std::string("Jugar")                 + color.reset, 
-		color.magenta + std::string("Opciones")              + color.reset, 
-		color.cyan    + std::string("Ver maxima puntuacion") + color.reset,
-		color.orange  + std::string("Resetear puntuacion")   + color.reset,
-		color.red     + std::string("Salir")                 + color.reset,
+		color.green   + "Jugar"                 + color.reset, 
+		color.magenta + "Opciones"              + color.reset, 
+		color.cyan    + "Ver maxima puntuacion" + color.reset,
+		color.orange  + "Resetear puntuacion"   + color.reset,
+		color.red     + "Salir"                 + color.reset,
 	};
 	
 	static std::size_t n = 0;

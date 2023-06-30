@@ -33,7 +33,7 @@ struct Pieza {
 	// constructor de copia
 	Pieza(const Pieza& p)                 : _sprite(p._sprite), _color(p._color) {}
 	// constructor normal
-	Pieza(char sprite, const char* color) : _sprite(sprite), _color(color) {}
+	Pieza(char sprite, std::string color) : _sprite(sprite), _color(color) {}
 	// constructor normal sin color
 	Pieza(char sprite)                    : _sprite(sprite), _color(color.reset) {}
 
@@ -48,7 +48,7 @@ struct Pieza {
 	friend std::ostream& operator<<(std::ostream& os, const Pieza& p) { return os << p._color << p._sprite; }
 private:
 	char        _sprite;
-	const char* _color;
+	std::string _color;
 };
 
 /*
