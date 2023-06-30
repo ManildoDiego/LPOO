@@ -37,13 +37,13 @@ extern std::vector<std::pair<std::string, char>> controles;
 
 #define DEFAULT_SPRITE static_cast<char>(1)
 
-class Juego {
+class Juego final {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
-	const std::size_t _maxPuntuacion;
-	const std::string _maxNombre;
+	const std::size_t maxPuntuacion;
+	const std::string maxNombre;
 
-	Mapa            _mapa{};
+	Mapa              _mapa{};
 	const Coords_t    _pacmanInitPos = {17, 13};
 
 	std::size_t _puntuacion        = 0;
@@ -51,6 +51,7 @@ class Juego {
 	std::size_t _moverFantasma     = 0;
 	std::size_t _timerMovFantasmas = 2;
 
+	// vector de punteros de fantasmas (clases abstractas)
 	std::vector<Fantasma*> _fantasmas = {
 		new Blinky( DEFAULT_SPRITE, {14, 12} ),
 		new Pinky ( DEFAULT_SPRITE, {14, 13} ),
@@ -75,13 +76,14 @@ public:
 	std::size_t getPuntuacion() const { return _puntuacion; }
 };
 
-Juego::Juego() : _maxPuntuacion(leerPuntuacion()), _maxNombre(leerNombre()) {
+Juego::Juego() : maxPuntuacion(leerPuntuacion()), maxNombre(leerNombre()) {
 	pacman.pos = _pacmanInitPos;
 	pacman.prevPos = pacman.pos;
 }
 
 Juego::~Juego() {
-	if (_puntuacion > _maxPuntuacion) {
+	// si la puntuacion actual, es mayor que la maxima, lo guarda
+	if (_puntuacion > maxPuntuacion) {
 		system("cls");
 		std::string nombre{};
 		std::cout << "Nueva maxima puntuacion!: " << _puntuacion << std::endl;
@@ -243,9 +245,9 @@ std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 	gotoxy(offset_x+juego._mapa.columnas, 0);
 	os << color.magenta << "Puntos: " << juego._puntuacion;
 
-	if (juego._maxNombre != "NULL") {
+	if (juego.maxNombre != "NULL") {
 		gotoxy(offset_x+juego._mapa.columnas, 3);
-		os << color.blue << "Maxima puntuacion: " << juego._maxPuntuacion << " hecha por \"" << juego._maxNombre << "\"";
+		os << color.blue << "Maxima puntuacion: " << juego.maxPuntuacion << " hecha por \"" << juego.maxNombre << "\"";
 	}
 
 	os << color.reset;

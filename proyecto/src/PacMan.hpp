@@ -3,7 +3,7 @@
 #include "Pieza.hpp"
 #include "PacMan.hpp"
 
-struct PacMan {
+struct PacMan final {
 	// declaro que Coords_t = std::pair<int64_t, int64_t>
 	using Coords_t = std::pair<int64_t, int64_t>;
 

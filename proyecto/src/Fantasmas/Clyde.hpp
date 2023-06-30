@@ -12,6 +12,10 @@ struct Clyde final : public Fantasma {
 protected:
 	// sobreescribo el metodo _SeguirPacman
 	void _SeguirPacman(const PacMan& p) override {
+		/*
+			hecho con chat gpt
+			la pregunta fue -> Necesito una funcion _SeguirPacman que si p.pos sea mayor o igual que la distancia del pacman lo siga
+		*/
 		static const double SEGUIR_PACMAN = 8;
 		const double distance = std::sqrt(std::pow(p.pos.first - pos.first, 2) + std::pow(p.pos.second - pos.second, 2));
 

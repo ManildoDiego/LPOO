@@ -7,7 +7,7 @@
 #define FILAS_SIZE 31
 #define COLUMNAS_SIZE 28
 
-struct Mapa : public std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE> {
+struct Mapa final : public std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SIZE> {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
 	static const std::size_t filas    = FILAS_SIZE;

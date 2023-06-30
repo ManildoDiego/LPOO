@@ -27,7 +27,7 @@ enum class Tipo_Pieza {
 	FRUTA,  // Simbolo: ● (rojo)
 };
 
-struct Pieza {
+struct Pieza final {
 	// constructor default
 	Pieza()                               : _sprite('\0'), _color("") {}
 	// constructor de copia

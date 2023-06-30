@@ -12,6 +12,10 @@ struct Inky final : public Fantasma {
 protected:
 	// sobreescribo el metodo _SeguirPacman
 	void _SeguirPacman(const PacMan& p) override {
+		/*
+			hecho con chat gpt
+			la pregunta fue -> Necesito una funcion _SeguirPacman que p.pos prediga los movimientos de pacman a 2 casillas de distancia
+		*/
 		const int64_t target_x = p.pos.first + 2 * (p.pos.first - pos.first);
 		const int64_t target_y = p.pos.second + 2 * (p.pos.second - pos.second);
 
