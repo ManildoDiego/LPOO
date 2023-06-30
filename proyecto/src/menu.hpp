@@ -46,7 +46,8 @@ void salir() {
 	std::cout << color.red   << "\tFransico Tumulty " << color.reset << "-> diseniador grafico\n";
 	gotoxy(coords.first, coords.second + 4);
 	std::cout << color.blue  << "\tJoaquin Pagano   " << color.reset << "-> diseniador y programador\n";
-	system("pause");
+	std::cin.get();
+	system("cls");
 
 	exit(0);
 }

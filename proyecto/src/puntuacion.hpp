@@ -9,10 +9,12 @@ extern "C" {
 	#include <dirent.h>
 }
 
+#include "manejoConsola.hpp"
+
 // nombre del archivo que se va a abrir
 const char* puntajeFileName = "others/Puntaje.txt";
-const char* nombreFileName = "others/Nombre.txt";
-const char* othersDir = "others";
+const char* nombreFileName  = "others/Nombre.txt";
+const char* othersDir       = "others";
 
 bool existeOthers() {
 	DIR* dir = opendir(othersDir);
@@ -39,7 +41,7 @@ void guardarPuntuacion(std::size_t puntuacion) {
 	
 	if (archivo == NULL) {
 		system("cls");
-	  std::cout << "[ERROR] No se pudo abrir el archivo de puntaje.\n";
+	  throw std::runtime_error("[ERROR] No se pudo abrir el archivo de puntaje.\n");
 	  return;
 	}
 	
@@ -55,7 +57,7 @@ void guardarNombre(const std::string& nombre) {
 	
 	if (archivo == NULL) {
 		system("cls");
-	  std::cout << "[ERROR] No se pudo abrir el archivo de nombre.\n";
+	  throw std::runtime_error("[ERROR] No se pudo abrir el archivo de nombre.\n");
 	  return;
 	}
 	
@@ -74,7 +76,23 @@ std::size_t leerPuntuacion() {
 
 	// si no existe el archivo lanzo una excepcion
   if (archivo == NULL) {
-		throw std::runtime_error("[ERROR] No existe el archivo");
+		system("cls");
+		gotoxy(getCentroConsola());
+		std::cout << "Creando archivo de puntaje"; Sleep(500);
+		std::cout << '.';                          Sleep(500);
+		std::cout << '.';                          Sleep(500);
+		std::cout << '.' << std::endl;             Sleep(500);
+		
+		// lo creo
+		archivo = fopen(puntajeFileName, "w+");
+	  fclose(archivo);
+		guardarPuntuacion(0);
+
+		system("cls");
+		std::cout << "Archivo creado!";
+		Sleep(1000);
+		system("cls");
+		return 0;
   }
 
 	// scaneo el puntaje
@@ -97,6 +115,7 @@ std::string leerNombre() {
 	// si no existe el archivo, lo creo
   if (archivo == NULL) {
 		system("cls");
+		gotoxy(getCentroConsola());
 		std::cout << "Creando archivo de nombre"; Sleep(500);
 		std::cout << '.';                         Sleep(500);
 		std::cout << '.';                         Sleep(500);
@@ -128,6 +147,7 @@ void crearOthersSiNoExiste() {
 		crearOthers();
 
 		system("cls");
+		gotoxy(getCentroConsola());
 		std::cout << "Creando archivos"; Sleep(500);
 		std::cout << '.';                Sleep(500);
 		std::cout << '.';                Sleep(500);
