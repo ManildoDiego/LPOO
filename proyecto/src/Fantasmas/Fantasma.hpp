@@ -19,25 +19,26 @@ extern "C" {
 
 using Coords_t = std::pair<int64_t, int64_t>;
 
-class Fantasma {
-	char          _sprite;
-	std::size_t   _timerSalida = 3;
-	bool          _barreraActiva = false;
-public:
+struct Fantasma {
+	std::size_t   timerSalida = 3;
+	bool          barreraActiva = false;
 	std::size_t   resetTimer = 40;
 	Coords_t      pos;
 	Coords_t      initPos;
 	std::size_t   contadorMovimientosSalida = 3;
 	bool          huyendo = false;
 	bool          enojado = false;
+private:
+	char          _sprite;
 public:
 	Fantasma();
 	Fantasma(const Fantasma&);
 	Fantasma(char, Coords_t);
 
 	Fantasma& operator=(const Fantasma&);
-	bool resetear();
+	bool resetear(bool);
 	void mover(const PacMan&, Mapa&);
+	void murio();
 
 	friend std::ostream& operator<<(std::ostream&, const Fantasma&);
 protected:
@@ -47,7 +48,7 @@ protected:
 	virtual void _SeguirPacman(const PacMan&) = 0;
 
 	static Coords_t _MoverRandom(Coords_t, int);
-	static Coords_t _MoverFantasma(Coords_t, Coords_t, Coords_t);
+	static Coords_t _MoverFantasma(Coords_t, const Coords_t&, const Coords_t&);
 
 	void _CorregirPosicion(const Coords_t&, const Mapa&);
 	void _Huir(const PacMan&);
@@ -55,11 +56,11 @@ protected:
 
 Fantasma::Fantasma() = default;
 
-Fantasma::Fantasma(const Fantasma& p) : _sprite(p._sprite), pos(p.pos) { 
+Fantasma::Fantasma(const Fantasma& p) : pos(p.pos), _sprite(p._sprite) { 
 	initPos = p.initPos;
 }
 
-Fantasma::Fantasma(char sprite, Coords_t pos) : _sprite(sprite), pos(pos) { 
+Fantasma::Fantasma(char sprite, Coords_t pos) : pos(pos), _sprite(sprite) { 
 	initPos = pos;
 }
 
@@ -75,9 +76,10 @@ std::ostream& operator<<(std::ostream& os, const Fantasma& p) {
 	return os << f_color << p._sprite; 
 }
 
-bool Fantasma::resetear() {
+bool Fantasma::resetear(bool resetear_siempre = false) {
+	
 	// si esta huyendo o enojado y el timer esta a 1 resetea el timer 
-	if ((huyendo || enojado) && resetTimer == 1) {
+	if (((huyendo || enojado) && resetTimer == 1) || resetear_siempre) {
 		resetTimer = 40;
 		huyendo = false;
 		enojado = false;
@@ -94,6 +96,11 @@ bool Fantasma::resetear() {
 
 // mueve al pacman
 void Fantasma::mover(const PacMan& p, Mapa& mapa) {
+	if (timerSalida > 0) {
+		timerSalida--;
+		return;
+	} 
+	
 	if (huyendo) {
 		const auto ultima_posicion = pos;
 		_Huir(p);
@@ -101,18 +108,16 @@ void Fantasma::mover(const PacMan& p, Mapa& mapa) {
 		return;
 	}
 	
-	if (_timerSalida > 0) {
-		_timerSalida--;
-		return;
-	} 
-	
 	const auto ultima_posicion = pos;
 
 	if (contadorMovimientosSalida > 0) {
 		contadorMovimientosSalida--;
 		pos.first--;
+		for (std::size_t j = 12; j <= 15; j++) {
+			mapa.at(12).at(j) = Piezas.at(Tipo_Pieza::VACIO);
+		}
 	} else {
-		if (!_barreraActiva) {
+		if (!barreraActiva) {
 			for (std::size_t j = 12; j <= 15; j++) {
 				mapa.at(12).at(j) = Piezas.at(Tipo_Pieza::BARRERA);
 			}
@@ -130,6 +135,7 @@ void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa& ma
 		return 
 		p != Piezas.at(Tipo_Pieza::PACMAN) && 
 		p != Piezas.at(Tipo_Pieza::PUNTOS) && 
+		p != Piezas.at(Tipo_Pieza::FRUTA) && 
 		p != Piezas.at(Tipo_Pieza::VACIO);
 	};
 	
@@ -144,7 +150,7 @@ void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa& ma
 }
 
 void Fantasma::_Huir(const PacMan& p) {
-  int64_t move_x = (pos.first - p.pos.first > 0) ? 1 : -1;
+  int64_t move_x = (pos.first - p.pos.first > 0)   ? 1 : -1;
   int64_t move_y = (pos.second - p.pos.second > 0) ? 1 : -1;
 
 	if (pos == Coords_t{14, 0} && move_y == -1) { // IZQUIERDA
@@ -183,7 +189,7 @@ Coords_t Fantasma::_MoverRandom(Coords_t position, int _RandomNumber) {
 	return position;
 }
 
-Coords_t Fantasma::_MoverFantasma(Coords_t pos, Coords_t ghost, Coords_t pac) {
+Coords_t Fantasma::_MoverFantasma(Coords_t pos, const Coords_t& ghost, const Coords_t& pac) {
 	if (pos == Coords_t{14, 0} && ghost.second > pac.second) { // IZQUIERDA
 		return {14, COLUMNAS_SIZE-1};
 	}
@@ -197,14 +203,19 @@ Coords_t Fantasma::_MoverFantasma(Coords_t pos, Coords_t ghost, Coords_t pac) {
 		pos.first++;
 	} else if (ghost.first > pac.first) {
 		pos.first--;
-	}
-
-
-	if (ghost.second < pac.second) {
+	} else if (ghost.second < pac.second) {
 		pos.second++;
 	} else if (ghost.second > pac.second) {
 		pos.second--;
 	}
 
 	return pos;
+}
+
+void Fantasma::murio() {
+	pos = initPos;
+	barreraActiva = false;
+	timerSalida = 3;
+	contadorMovimientosSalida = 3;
+	resetear(true);
 }

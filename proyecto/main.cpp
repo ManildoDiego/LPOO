@@ -51,11 +51,20 @@ inicio:
 		juego.actualizar(inputKey);
 		cout << juego << endl;
 
+		if (juego.gano()) {
+			system("cls");
+			gotoxy(getCentroConsola());
+			cout << color.green << "Ganaste!\n" << color.reset;
+			cin.get();
+			goto inicio;
+		}
+
 		// pausa la consola
 		Sleep(TICK_RATE);
 	}
 
 	perdio();
+	goto inicio;
 
 	// sale del programa
 	salir();

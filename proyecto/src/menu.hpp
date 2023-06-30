@@ -57,9 +57,8 @@ void perdio() {
 	system("cls");
 
 	gotoxy(getCentroConsola());
-	std::cout << "Perdiste!";
+	std::cout << color.red << "Perdiste!" << color.reset;
 	std::cin.get();
-	salir();
 }
 
 void menuControles() {
