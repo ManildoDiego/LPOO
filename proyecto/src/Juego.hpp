@@ -7,7 +7,7 @@
 
 #include "Pieza.hpp"
 #include "PacMan.hpp"
-#include "manejo_consola.hpp"
+#include "manejoConsola.hpp"
 #include "puntuacion.hpp"
 #include "Mapa.hpp"
 
@@ -85,11 +85,14 @@ Juego::~Juego() {
 		system("cls");
 		std::string nombre{};
 		std::cout << "Nueva maxima puntuacion!: " << _puntuacion << std::endl;
+		setCursorConsola(true);
 		std::cout << "Ingrese nombre del jugador: ";
 
-		while (nombre.empty() || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
+		while (nombre.empty() || nombre == "NULL" || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
       std::getline(std::cin, nombre);
     }
+
+		setCursorConsola(false);
 
 		guardarNombre(nombre);
 		guardarPuntuacion(_puntuacion);
@@ -201,7 +204,7 @@ void Juego::actualizar(char k) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Juego& juego) {
-	const auto offset_x = obtener_centro_consola().first;
+	const auto offset_x = getCentroConsola().first;
 	
 	bool habia_fantasma = false;
 
@@ -240,7 +243,7 @@ std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 	gotoxy(offset_x+juego._mapa.columnas, 0);
 	os << color.magenta << "Puntos: " << juego._puntuacion;
 
-	if (juego._maxPuntuacion != 0 || juego._maxNombre != "NULL") {
+	if (juego._maxNombre != "NULL") {
 		gotoxy(offset_x+juego._mapa.columnas, 3);
 		os << color.blue << "Maxima puntuacion: " << juego._maxPuntuacion << " hecha por \"" << juego._maxNombre << "\"";
 	}

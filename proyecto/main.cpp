@@ -20,7 +20,7 @@ int main() {
 inicio:
 	// preparo la consola
 	system("cls"); 
-	ocultar_cursor();
+	setCursorConsola();
 
 	// menu inicial
 	while (1) {

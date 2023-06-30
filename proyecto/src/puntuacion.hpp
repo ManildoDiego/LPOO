@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <windows.h>
+#include <stdexcept>
 
 extern "C" {
 	#include <dirent.h>
@@ -11,10 +12,10 @@ extern "C" {
 // nombre del archivo que se va a abrir
 const char* puntajeFileName = "others/Puntaje.txt";
 const char* nombreFileName = "others/Nombre.txt";
-const char* othersdir = "others";
+const char* othersDir = "others";
 
 bool existeOthers() {
-	DIR* dir = opendir(othersdir);
+	DIR* dir = opendir(othersDir);
 	
 	if (dir) {
 		closedir(dir);
@@ -25,14 +26,10 @@ bool existeOthers() {
 }
 
 void crearOthers() {
-	mkdir(othersdir);
+	mkdir(othersDir);
 }
 
-void crearOthersSiNoExiste() {
-	if (!existeOthers()) {
-		crearOthers();
-	}
-}
+void crearOthersSiNoExiste();
 
 // guarda la maxima puntuacion
 void guardarPuntuacion(std::size_t puntuacion) {
@@ -75,26 +72,9 @@ std::size_t leerPuntuacion() {
 	// abro el archivo en modo lectura
   FILE *archivo = fopen(puntajeFileName, "r");
 
-	// si no existe el archivo, lo creo
+	// si no existe el archivo lanzo una excepcion
   if (archivo == NULL) {
-		system("cls");
-		std::cout << "Creando archivo de puntaje"; Sleep(500);
-		std::cout << '.';                          Sleep(500);
-		std::cout << '.';                          Sleep(500);
-		std::cout << '.' << std::endl;             Sleep(500);
-		
-		// lo creo
-		archivo = fopen(puntajeFileName, "w+");
-	  fclose(archivo);
-		// guardo "0" puntos
-		guardarPuntuacion(0);
-
-		system("cls");
-		std::cout << "Archivo creado!";
-		Sleep(1000);
-		system("cls");
-		// devuelvo que tenia 0 puntos
-		return 0;
+		throw std::runtime_error("[ERROR] No existe el archivo");
   }
 
 	// scaneo el puntaje
@@ -141,4 +121,32 @@ std::string leerNombre() {
 	}
   fclose(archivo);
   return nombre;
+}
+
+void crearOthersSiNoExiste() {
+	if (!existeOthers()) {
+		crearOthers();
+
+		system("cls");
+		std::cout << "Creando archivos"; Sleep(500);
+		std::cout << '.';                Sleep(500);
+		std::cout << '.';                Sleep(500);
+		std::cout << '.' << std::endl;   Sleep(500);
+		
+		// creo archivo de puntaje
+		FILE* archivo = fopen(puntajeFileName, "w+");
+	  fclose(archivo);
+		// guardo "0" puntos
+		guardarPuntuacion(0);
+		// creo archivo de nombre
+		archivo = fopen(puntajeFileName, "w");
+	  fclose(archivo);
+		guardarNombre("NULL");
+
+
+		system("cls");
+		std::cout << "Archivos creados!";
+		Sleep(1000);
+		system("cls");
+	}
 }

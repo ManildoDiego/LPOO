@@ -17,15 +17,15 @@ void gotoxy(const std::pair<T1, T2>& coords) {
 }
 
 // oculta el cursor en la consola
-void ocultar_cursor() {
+void setCursorConsola(bool visible = false) {
   HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
   CONSOLE_CURSOR_INFO cursorInfo;
   GetConsoleCursorInfo(consoleHandle, &cursorInfo);
-  cursorInfo.bVisible = FALSE;
+  cursorInfo.bVisible = static_cast<WINBOOL>(visible);
   SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 }
 
-std::pair<int64_t, int64_t> obtener_centro_consola() {
+std::pair<int64_t, int64_t> getCentroConsola() {
   CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
   GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
 

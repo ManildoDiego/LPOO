@@ -11,10 +11,12 @@ extern "C" {
 	#include <conio.h>
 }
 
-#include "manejo_consola.hpp"
+#include "manejoConsola.hpp"
+#include "colors.hpp"
+#include "puntuacion.hpp"
 
-#define ARRIBA    static_cast<char>(72)
-#define ABAJO     static_cast<char>(80)
+#define ARRIBA static_cast<char>(72)
+#define ABAJO  static_cast<char>(80)
 
 #define ESC   static_cast<char>(27)
 #define ENTER static_cast<char>(13)
@@ -33,7 +35,7 @@ std::vector<Tecla_t> controles = {
 void salir() {
 	system("cls");
 
-	const auto coords = obtener_centro_consola();
+	const auto coords = getCentroConsola();
 	gotoxy(coords);
 	std::cout << "Gracias por jugar!\n";
 	gotoxy(coords.first, coords.second + 1);
@@ -44,6 +46,7 @@ void salir() {
 	std::cout << color.red   << "\tFransico Tumulty " << color.reset << "-> diseniador grafico\n";
 	gotoxy(coords.first, coords.second + 4);
 	std::cout << color.blue  << "\tJoaquin Pagano   " << color.reset << "-> diseniador y programador\n";
+	system("pause");
 
 	exit(0);
 }
@@ -52,7 +55,7 @@ void salir() {
 void perdio() {
 	system("cls");
 
-	gotoxy(obtener_centro_consola());
+	gotoxy(getCentroConsola());
 	std::cout << "Perdiste!";
 	std::cin.get();
 	salir();
@@ -93,11 +96,13 @@ void menuControles() {
 				if (n == controles.size()) { 
 					return; 
 				}
+				setCursorConsola(true);
 				std::cout << "Ingrese una tecla: ";
 				char key = '\0';
 
 				do {
 					key = static_cast<char>(getch());
+					setCursorConsola(false);
 					system("cls");
 				} while (iscntrl(key) || isdigit(key) || esta_en_controles(key, controles.at(n)));
 				
@@ -108,7 +113,7 @@ void menuControles() {
 			else if (inputKey == ABAJO && n < controles.size()) { n++; }
 		}
 
-		const auto console_coords = obtener_centro_consola();
+		const auto console_coords = getCentroConsola();
 
 		const auto& offset_x = console_coords.first;
 		const auto& offset_y = console_coords.second;
@@ -175,18 +180,22 @@ bool menu() {
 				menuControles();
 				break;
 			case 2: {
-				// 
-				const auto coords = obtener_centro_consola();
+				// Mostrar maxima puntuacion
+				const auto coords = getCentroConsola();
 				gotoxy(coords);
 				auto p = leerPuntuacion();
 				auto n = leerNombre();
-				if (p != 0 || n != "NULL") {
+				
+				if (n != "NULL") {
 					std::cout << "Maxima puntuacion: " << p << std::endl;
 					gotoxy(coords.first, coords.second+1);
 					std::cout << "Hecha por: \"" << n << "\"\n";
-				} else {
+				} 
+				
+				else {
 					std::cout << "Ninguna puntuacion ha sido registrada!\n";
 				}
+
 				std::cin.get();
 				system("cls");
 				break;
@@ -195,7 +204,7 @@ bool menu() {
 				// resetea la puntuacion
 				guardarPuntuacion(0);
 				guardarNombre("NULL");
-				gotoxy(obtener_centro_consola());
+				gotoxy(getCentroConsola());
 				std::cout << "La puntuacion ha sido reseteada!\n";
 				std::cin.get();
 				system("cls");
@@ -210,7 +219,7 @@ bool menu() {
 		}
 	}
 
-	const auto console_coords = obtener_centro_consola();
+	const auto console_coords = getCentroConsola();
 
 	const auto& offset_x = console_coords.first;
 	const auto& offset_y = console_coords.second;
