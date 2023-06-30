@@ -16,8 +16,10 @@ extern "C" {
 #define ARRIBA    static_cast<char>(72)
 #define ABAJO     static_cast<char>(80)
 
-#define __TIMER 20
+#define ESC   static_cast<char>(27)
+#define ENTER static_cast<char>(13)
 
+// declaro que Tecla_t = std::pair<const char*, char>
 using Tecla_t = std::pair<const char*, char>;
 
 std::vector<Tecla_t> controles = {
@@ -27,6 +29,7 @@ std::vector<Tecla_t> controles = {
 	{"IZQUIERDA", 'a'},
 };
 
+// funcion de salir y creditos
 void salir() {
 	system("cls");
 
@@ -113,20 +116,19 @@ void menu_opciones() {
 			std::cout << "   VOLVER   ";
 		}
 
-		Sleep(__TIMER);
+		Sleep(20);
 	}
 }
 
-#define ESC   static_cast<char>(27)
-#define ENTER static_cast<char>(13)
-
 bool menu() {
+	// menu de opciones
 	static std::vector<std::string> opciones = {
 		"Jugar", 
 		"Opciones", 
 		"Ver maxima puntuacion",
 		"Salir",
 	};
+	
 	static std::size_t n = 0;
 
 	char input_key = '\0';
@@ -150,14 +152,20 @@ bool menu() {
 	if (input_key == ENTER) {
 		system("cls");
 		switch (n) {
-			case 0: return true;
-			case 1: menu_opciones(); break;
+			case 0: 
+				return true;
+			case 1: 
+				menu_opciones();
+				break;
 			case 2:
 				std::cout << "Maxima puntuacion: " << leerPuntuacion() << std::endl;
+				std::cout << "Hecha por: \"" << leerNombre() << "\"\n";
 				std::cin.get();
 				system("cls");
 				break;
-			case 3: goto salida; break;
+			case 3: 
+				goto salida;
+				break;
 			default:
 				throw std::invalid_argument("Opcion invalida (0-3) -> " + std::to_string(n));
 				break;
@@ -180,7 +188,7 @@ bool menu() {
     std::cout << "   " << opciones[i] << "   ";
 	}
 
-	Sleep(__TIMER);
+	Sleep(20);
 
 	return false;
 }

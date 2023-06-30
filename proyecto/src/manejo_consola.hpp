@@ -2,13 +2,21 @@
 
 #include <windows.h>
 
-void gotoxy(std::size_t x, std::size_t y) {
+// va a la posicion x y en la consola
+template <typename T1, typename T2>
+void gotoxy(T1 x, T2 y) {
 	COORD coord;
   coord.X = static_cast<short>(x);
   coord.Y = static_cast<short>(y);
   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
+template <typename T1, typename T2>
+void gotoxy(const std::pair<T1, T2>& coords) {
+  gotoxy(coords.first, coords.second);
+}
+
+// oculta el cursor en la consola
 void ocultar_cursor() {
   HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
   CONSOLE_CURSOR_INFO cursorInfo;
@@ -21,8 +29,9 @@ std::pair<int64_t, int64_t> obtener_centro_consola() {
   CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
   GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
 
-  auto x = ((consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1) / 2)-25;
-  auto y = ((consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1) / 2)-15;
+  // posiciones de la consola
+  auto x = static_cast<int64_t>(((consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1) / 2)-25);
+  auto y = static_cast<int64_t>(((consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1) / 2)-15);
 
   return {x, y};
 }

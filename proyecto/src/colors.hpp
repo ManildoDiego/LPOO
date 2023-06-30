@@ -1,5 +1,6 @@
 #pragma once
 
+// struct anonimo de colores
 struct {
 	const char* grey       = "\x1B[30m";
 	const char* red        = "\x1B[31m";

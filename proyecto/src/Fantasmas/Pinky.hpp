@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Fantasma.hpp"
+// clase derivada de fantasma
 
 struct Pinky final : public Fantasma {
+	// uso el mismo constructor de la clase Fantasma
 	using Fantasma::Fantasma;
 	
-	std::string get_color() const override { return color.magenta; }
+	// sobreescribo el metodo _GetColor
+	std::string _GetColor() const override { return color.magenta; }
 protected:
-	void seguir_pacman(const PacMan& p) override {
+	// sobreescribo el metodo _SeguirPacman
+	void _SeguirPacman(const PacMan& p) override {
 		const int64_t target_x = p.pos.first + 4 * (p.pos.first - p.prev_pos.first);
 		const int64_t target_y = p.pos.second + 4 * (p.pos.second - p.prev_pos.second);
 

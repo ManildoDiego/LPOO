@@ -2,12 +2,16 @@
 
 #include "Fantasma.hpp"
 
+// clase derivada de fantasma
 struct Blinky final : public Fantasma {
+	// uso el mismo constructor de la clase Fantasma
 	using Fantasma::Fantasma;
 	
-	std::string get_color() const override { return color.red; }
+	// sobreescribo el metodo _GetColor
+	std::string _GetColor() const override { return color.red; }
 protected:
-	void seguir_pacman(const PacMan& p) override {
+	// sobreescribo el metodo _SeguirPacman
+	void _SeguirPacman(const PacMan& p) override {
 		pos = _MoverFantasma(pos, pos, p.pos);
 	}
 };

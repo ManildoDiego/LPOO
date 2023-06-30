@@ -41,7 +41,6 @@ inicio:
 	while (!juego.murio()) {
 		// si toca el teclado, guarda la tecla
 		if (kbhit()) {
-			anterior = input_key;
 			input_key = static_cast<char>(getch());
 		}
 
@@ -51,7 +50,7 @@ inicio:
 		}
 
 		// actualiza el tablero
-		juego.actualizar(&input_key, anterior);
+		juego.actualizar(&input_key, &anterior);
 		cout << juego << endl;
 
 		// pausa la consola

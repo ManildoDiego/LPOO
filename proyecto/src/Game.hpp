@@ -40,6 +40,7 @@ struct Game {
 	PacMan pacman;
 private:
 	const std::size_t max_puntuacion;
+	const std::string max_nombre;
 	Mapa_t m_map{};
 
 	const Coords_t pacman_init_pos = {17, 13};
@@ -61,7 +62,7 @@ private:
 	void fill_fila(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void fill_columna(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void crear_rectangulo(Coords_t, std::size_t, std::size_t);
-	void modificar_posicion(const char*);
+	void modificar_posicion(char);
 	void comprobar_colisiones_fantasmas();
 	void actualizar_fantasmas();
 	void crear_frutas();
@@ -74,7 +75,7 @@ public:
 
 	friend std::ostream& operator<<(std::ostream&, const Game&);
 
-	void actualizar(char*, char);
+	void actualizar(char*, char*);
 	bool murio() { return vidas < 1; }
 	size_t get_puntuacion() const { return puntuacion; }
 };
@@ -127,19 +128,19 @@ void Game::crear_rectangulo(Coords_t pos, std::size_t w, std::size_t h) {
   }
 }
 
-void Game::modificar_posicion(const char* k) {	
-	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(*k)) {
+void Game::modificar_posicion(char k) {	
+	if (pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
 		pacman.setPos({14, COLUMNAS_SIZE-1});
 	}
 
-	else if (pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(*k)) {
+	else if (pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(k)) {
 		pacman.setPos({14, 0});
 	}
 
-	else if (MOVER_ARRIBA(*k))    { pacman.setPos(pacman.pos.first-1, pacman.pos.second); }
-	else if (MOVER_ABAJO(*k))     { pacman.setPos(pacman.pos.first+1, pacman.pos.second); }
-	else if (MOVER_DERECHA(*k))   { pacman.setPos(pacman.pos.first, pacman.pos.second+1); }
-	else if (MOVER_IZQUIERDA(*k)) { pacman.setPos(pacman.pos.first, pacman.pos.second-1); }
+	else if (MOVER_ARRIBA(k))    { pacman.setPos(pacman.pos.first-1, pacman.pos.second); }
+	else if (MOVER_ABAJO(k))     { pacman.setPos(pacman.pos.first+1, pacman.pos.second); }
+	else if (MOVER_DERECHA(k))   { pacman.setPos(pacman.pos.first, pacman.pos.second+1); }
+	else if (MOVER_IZQUIERDA(k)) { pacman.setPos(pacman.pos.first, pacman.pos.second-1); }
 }
 
 void Game::comprobar_colisiones_fantasmas() {
@@ -191,7 +192,7 @@ void Game::comprobar_colisiones_fruta() {
 	};
 	
 	if (is_hitting(Tipo_Pieza::FRUTA)) {
-		srand(time(0));
+		srand(static_cast<unsigned int>(time(0)));
 
 		bool fruta_trampa = ((rand() % 4) == 0);
 		puntuacion += 300;
@@ -227,7 +228,7 @@ void Game::comprobar_colisiones_fruta() {
 	}
 }
 
-Game::Game() : max_puntuacion(leerPuntuacion()) {
+Game::Game() : max_puntuacion(leerPuntuacion()), max_nombre(leerNombre()) {
 	pacman.pos = pacman_init_pos;
 	pacman.prev_pos = pacman.pos;
 	
@@ -256,10 +257,13 @@ Game::Game() : max_puntuacion(leerPuntuacion()) {
 
 Game::~Game() {
 	if (puntuacion > max_puntuacion) {
-		guardarPuntuacion(puntuacion);
 		system("cls");
+		std::string nombre{};
 		std::cout << "Nueva maxima puntuacion!: " << puntuacion << std::endl;
-		std::cin.get();
+		std::cout << "Ingrese nombre del jugador: ";
+		std::getline(std::cin, nombre);
+		guardarNombre(nombre);
+		guardarPuntuacion(puntuacion);
 	}
 }
 
@@ -395,18 +399,20 @@ bool Game::posicion_valida(const Pieza& p) {
 	p == Piezas.at(Tipo_Pieza::FRUTA);
 }
 
-void Game::actualizar(char* k, char anterior) {
+void Game::actualizar(char* k, char *anterior) {
 	const auto old_position = pacman.pos;
 
-	modificar_posicion(k);
+	modificar_posicion(*k);
 
 	const auto& pieza = m_map.at(pacman.pos.first).at(pacman.pos.second); 
 
 	if (!posicion_valida(pieza)) {
 		pacman.setPos(old_position, true);
-		*k = anterior;
+		*k = *anterior;
 		actualizar_fantasmas();
 		return;
+	} else {
+		*anterior = *k;
 	}
 
 	actualizar_fantasmas();
@@ -452,8 +458,6 @@ std::ostream& operator<<(std::ostream& os, const Game& m) {
 		os << '\n';
 	}
 
-
-	
 	gotoxy(offset_x, m.filas);
 	for (std::size_t i = 0; i < m.vidas; i++) {
 		os << m.pacman << ' ';
@@ -462,8 +466,10 @@ std::ostream& operator<<(std::ostream& os, const Game& m) {
 	gotoxy(offset_x+m.columnas, 0);
 	os << color.magenta << "Puntos: " << m.puntuacion;
 
-	gotoxy(offset_x+m.columnas, 3);
-	os << color.blue << "Maxima puntuacion: " << m.max_puntuacion;
+	if (m.max_nombre != "") {
+		gotoxy(offset_x+m.columnas, 3);
+		os << color.blue << "Maxima puntuacion: " << m.max_puntuacion << " hecha por \"" << m.max_nombre << "\"";
+	}
 
 	os << color.reset;
 

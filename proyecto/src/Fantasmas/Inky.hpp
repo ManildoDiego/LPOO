@@ -2,12 +2,16 @@
 
 #include "Fantasma.hpp"
 
+// clase derivada de fantasma
 struct Inky final : public Fantasma {
+	// uso el mismo constructor de la clase Fantasma
 	using Fantasma::Fantasma;
 	
-	std::string get_color() const override { return color.blue; }
+	// sobreescribo el metodo _GetColor
+	std::string _GetColor() const override { return color.blue; }
 protected:
-	void seguir_pacman(const PacMan& p) override {
+	// sobreescribo el metodo _SeguirPacman
+	void _SeguirPacman(const PacMan& p) override {
 		const int64_t target_x = p.pos.first + 2 * (p.pos.first - pos.first);
 		const int64_t target_y = p.pos.second + 2 * (p.pos.second - pos.second);
 
