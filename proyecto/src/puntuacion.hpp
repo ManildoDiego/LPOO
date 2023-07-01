@@ -16,26 +16,11 @@ const char* puntajeFileName = "others/Puntaje.txt";
 const char* nombreFileName  = "others/Nombre.txt";
 const char* othersDir       = "others";
 
-bool existeOthers() {
-	DIR* dir = opendir(othersDir);
-	
-	if (dir) {
-		closedir(dir);
-		return true;
-	}
-
-	return false;
-}
-
-void crearOthers() {
-	mkdir(othersDir);
-}
-
-void crearOthersSiNoExiste();
+void crearOthers();
 
 // guarda la maxima puntuacion
 void guardarPuntuacion(std::size_t puntuacion) {
-	crearOthersSiNoExiste();
+	crearOthers();
 	
 	FILE *archivo = fopen(puntajeFileName, "w");
 	
@@ -51,7 +36,7 @@ void guardarPuntuacion(std::size_t puntuacion) {
 }
 
 void guardarNombre(const std::string& nombre) {
-	crearOthersSiNoExiste();
+	crearOthers();
 	
 	FILE *archivo = fopen(nombreFileName, "w");
 	
@@ -68,7 +53,7 @@ void guardarNombre(const std::string& nombre) {
 
 // leo puntuacion del archivo
 std::size_t leerPuntuacion() {
-	crearOthersSiNoExiste();
+	crearOthers();
 	
   std::size_t puntuacionMaxima;
 	// abro el archivo en modo lectura
@@ -89,6 +74,7 @@ std::size_t leerPuntuacion() {
 		guardarPuntuacion(0);
 
 		system("cls");
+		gotoxy(getCentroConsola());
 		std::cout << "Archivo creado!";
 		Sleep(1000);
 		system("cls");
@@ -104,7 +90,7 @@ std::size_t leerPuntuacion() {
 #define __CHAR_BUFFER 255
 
 std::string leerNombre() {
-	crearOthersSiNoExiste();
+	crearOthers();
 	
   char nombre[__CHAR_BUFFER];
   FILE *archivo;
@@ -127,6 +113,7 @@ std::string leerNombre() {
 		guardarNombre("NULL");
 
 		system("cls");
+		gotoxy(getCentroConsola());
 		std::cout << "Archivo creado!";
 		Sleep(1000);
 		system("cls");
@@ -142,9 +129,20 @@ std::string leerNombre() {
   return nombre;
 }
 
-void crearOthersSiNoExiste() {
-	if (!existeOthers()) {
-		crearOthers();
+void crearOthers() {
+	bool existeOthers = [] {
+		DIR* dir = opendir(othersDir);
+	
+		if (dir) {
+			closedir(dir);
+			return true;
+		}
+
+		return false;
+	}();
+	
+	if (!existeOthers) {
+		mkdir(othersDir);
 
 		system("cls");
 		gotoxy(getCentroConsola());
@@ -165,6 +163,7 @@ void crearOthersSiNoExiste() {
 
 
 		system("cls");
+		gotoxy(getCentroConsola());
 		std::cout << "Archivos creados!";
 		Sleep(1000);
 		system("cls");

@@ -30,8 +30,8 @@ std::pair<int64_t, int64_t> getCentroConsola() {
   GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
 
   // posiciones de la consola
-  auto x = static_cast<int64_t>(((consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1) / 2)-25);
-  auto y = static_cast<int64_t>(((consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1) / 2)-15);
+  const auto x = static_cast<int64_t>(((consoleInfo.srWindow.Right - consoleInfo.srWindow.Left + 1) / 2)-25);
+  const auto y = static_cast<int64_t>(((consoleInfo.srWindow.Bottom - consoleInfo.srWindow.Top + 1) / 2)-15);
 
   return {x, y};
 }

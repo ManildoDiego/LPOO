@@ -19,26 +19,32 @@ extern "C" {
 
 using Coords_t = std::pair<int64_t, int64_t>;
 
+#define DEFAULT_TIMER_SALIDA 10
+#define DEFAULT_TIMER_MOV_FANTASMAS 2
+#define DEFAULT_CONTADOR_MOVIMIENTOS_SALIDA 3
+#define DEFAULT_RESET_TIMER 40
+
 struct Fantasma {
-	std::size_t   timerSalida = 3;
-	bool          barreraActiva = false;
-	std::size_t   resetTimer = 40;
-	Coords_t      pos;
-	Coords_t      initPos;
-	std::size_t   contadorMovimientosSalida = 3;
-	bool          huyendo = false;
-	bool          enojado = false;
+	std::size_t timerMovFantasmas = DEFAULT_TIMER_MOV_FANTASMAS;
+	bool        huyendo = false;
+	Coords_t    pos;
 private:
-	char          _sprite;
+	std::size_t _contadorMovimientosSalida = DEFAULT_CONTADOR_MOVIMIENTOS_SALIDA;
+	std::size_t _timerSalida               = DEFAULT_TIMER_SALIDA;
+	std::size_t _resetTimer                = DEFAULT_RESET_TIMER;
+	bool        _barreraActiva = false;
+	bool        _enojado       = false;
+	char        _sprite;
+	Coords_t    _initPos;
 public:
 	Fantasma();
-	Fantasma(const Fantasma&);
-	Fantasma(char, Coords_t);
+	Fantasma(char, const Coords_t&);
 
-	Fantasma& operator=(const Fantasma&);
-	bool resetear(bool);
+	void resetear(bool);
 	void mover(const PacMan&, Mapa&);
 	void murio();
+	void setHuyendo();
+	void setEnojado();
 
 	friend std::ostream& operator<<(std::ostream&, const Fantasma&);
 protected:
@@ -56,48 +62,35 @@ protected:
 
 Fantasma::Fantasma() = default;
 
-Fantasma::Fantasma(const Fantasma& p) : pos(p.pos), _sprite(p._sprite) { 
-	initPos = p.initPos;
-}
-
-Fantasma::Fantasma(char sprite, Coords_t pos) : pos(pos), _sprite(sprite) { 
-	initPos = pos;
-}
-
-Fantasma& Fantasma::operator=(const Fantasma& p) { 
-	_sprite = p._sprite;
-	return *this;
-}
+Fantasma::Fantasma(char sprite, const Coords_t& pos) : pos(pos), _sprite(sprite), _initPos(pos) {}
 
 std::ostream& operator<<(std::ostream& os, const Fantasma& p) { 
 	// si esta huyendo, color cyan, si no, si esta enojado, rojo y si no el color que sea el fantasma
-	const auto f_color = (p.huyendo) ? color.cyan : (p.enojado) ? color.red : p._GetColor();
+	const auto colorFantasma = (p.huyendo) ? color.cyan : (p._enojado) ? color.red : p._GetColor();
 	// lo imprimo
-	return os << f_color << p._sprite; 
+	return os << colorFantasma << p._sprite;
 }
 
-bool Fantasma::resetear(bool resetear_siempre = false) {
-	
+void Fantasma::resetear(bool resetear_siempre = false) {
 	// si esta huyendo o enojado y el timer esta a 1 resetea el timer 
-	if (((huyendo || enojado) && resetTimer == 1) || resetear_siempre) {
-		resetTimer = 40;
+	if (((huyendo || _enojado) && _resetTimer == 1) || resetear_siempre) {
+		_resetTimer = DEFAULT_RESET_TIMER;
 		huyendo = false;
-		enojado = false;
-		return true;
+		_enojado = false;
+		timerMovFantasmas = DEFAULT_TIMER_MOV_FANTASMAS;
+		return;
 	}
 
 	// si no, si esta huyendo o enojado, disminuyo el timer
-	if (huyendo || enojado) {
-		resetTimer--;
+	if (huyendo || _enojado) {
+		_resetTimer--;
 	}
-
-	return false;
 }
 
 // mueve al pacman
 void Fantasma::mover(const PacMan& p, Mapa& mapa) {
-	if (timerSalida > 0) {
-		timerSalida--;
+	if (_timerSalida > 0) {
+		_timerSalida--;
 		return;
 	} 
 	
@@ -110,14 +103,16 @@ void Fantasma::mover(const PacMan& p, Mapa& mapa) {
 	
 	const auto ultima_posicion = pos;
 
-	if (contadorMovimientosSalida > 0) {
-		contadorMovimientosSalida--;
+	if (_contadorMovimientosSalida > 0) {
+		_contadorMovimientosSalida--;
 		pos.first--;
 		for (std::size_t j = 12; j <= 15; j++) {
 			mapa.at(12).at(j) = Piezas.at(Tipo_Pieza::VACIO);
 		}
-	} else {
-		if (!barreraActiva) {
+	} 
+	
+	else {
+		if (!_barreraActiva) {
 			for (std::size_t j = 12; j <= 15; j++) {
 				mapa.at(12).at(j) = Piezas.at(Tipo_Pieza::BARRERA);
 			}
@@ -131,17 +126,17 @@ void Fantasma::mover(const PacMan& p, Mapa& mapa) {
 
 // corrige la posicion del pacman
 void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa& mapa) {
-	auto pos_invalida = [](const Pieza& p) {
+	static auto posInvalida = [](const Pieza& p) {
 		return 
 		p != Piezas.at(Tipo_Pieza::PACMAN) && 
 		p != Piezas.at(Tipo_Pieza::PUNTOS) && 
 		p != Piezas.at(Tipo_Pieza::FRUTA) && 
 		p != Piezas.at(Tipo_Pieza::VACIO);
 	};
-	
+
 	Pieza pieza = mapa.at(pos.first).at(pos.second);
 
-	while (pos_invalida(pieza)) {
+	while (posInvalida(pieza)) {
 		pos = ultima_posicion;
 		int random = (rand() % 3) + 1;
 		pos = _MoverRandom(pos, random);
@@ -213,9 +208,21 @@ Coords_t Fantasma::_MoverFantasma(Coords_t pos, const Coords_t& ghost, const Coo
 }
 
 void Fantasma::murio() {
-	pos = initPos;
-	barreraActiva = false;
-	timerSalida = 3;
-	contadorMovimientosSalida = 3;
+	pos = _initPos;
+	_barreraActiva = false;
+	_timerSalida = DEFAULT_TIMER_SALIDA;
+	_contadorMovimientosSalida = DEFAULT_CONTADOR_MOVIMIENTOS_SALIDA;
 	resetear(true);
+}
+
+void Fantasma::setHuyendo() {
+	huyendo = true;
+	_resetTimer = DEFAULT_RESET_TIMER;
+	timerMovFantasmas = 3;
+}
+
+void Fantasma::setEnojado() {
+	_enojado = true;
+	_resetTimer = DEFAULT_RESET_TIMER;
+	timerMovFantasmas = 1;
 }
