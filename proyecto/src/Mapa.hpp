@@ -14,10 +14,11 @@ struct Mapa final : public std::array<std::array<Pieza, COLUMNAS_SIZE>, FILAS_SI
 	static const std::size_t columnas = COLUMNAS_SIZE;
 
 	Mapa();
+	~Mapa() = default;
 private:
+	void _CrearRectangulo(Coords_t, std::size_t, std::size_t);
 	void _LlenarFila(std::size_t, std::size_t, std::size_t, const Pieza&);
 	void _LlenarColumna(std::size_t, std::size_t, std::size_t, const Pieza&);
-	void _CrearRectangulo(Coords_t, std::size_t, std::size_t);
 	void _CrearFrutas();
 	void _CrearDisenio();
 };

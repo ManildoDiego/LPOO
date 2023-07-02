@@ -144,8 +144,8 @@ bool menu() {
 	static std::vector<std::string> opciones = {
 		color.green   + "Jugar"                 + color.reset, 
 		color.magenta + "Opciones"              + color.reset, 
-		color.cyan    + "Ver maxima puntuacion" + color.reset,
-		color.orange  + "Resetear puntuacion"   + color.reset,
+		color.cyan    + "Ver puntuaciones"      + color.reset,
+		color.orange  + "Resetear puntuaciones" + color.reset,
 		color.red     + "Salir"                 + color.reset,
 	};
 	
@@ -180,42 +180,45 @@ bool menu() {
 				menuControles();
 				break;
 			case 2: {
-				// Mostrar maxima puntuacion
-				const auto coords = getCentroConsola();
-				gotoxy(coords);
-				auto p = leerPuntuacion();
-				auto n = leerNombre();
-				
-				if (n != "NULL") {
-					std::cout << "Maxima puntuacion: " << p << std::endl;
-					gotoxy(coords.first, coords.second+1);
-					std::cout << "Hecha por: \"" << n << "\"\n";
-				} 
-				
-				else {
+				const auto data = leerData();
+				const auto c = getCentroConsola();
+				if (data == NULLDATA) {
+					std::cout << color.red;
+					gotoxy(c);
 					std::cout << "Ninguna puntuacion ha sido registrada!\n";
+					std::cin.get();
+					system("cls");
+					std::cout << color.reset;
+					break;
+				}
+
+				std::size_t i = 0;
+				
+				for (const auto& [nombre, puntos] : data) {
+					gotoxy(c.first, c.second+i);
+					std::cout << color.reset << "Puntuacion: " << color.orange << puntos << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << nombre << color.reset << color.cyan << "\"";
+					i++;
 				}
 
 				std::cin.get();
 				system("cls");
+				std::cout << color.reset;
 				break;
 			}
 			case 3: 				
 				// resetea la puntuacion
-				guardarPuntuacion(0);
-				guardarNombre("NULL");
+				guardarData(NULLDATA);
 				gotoxy(getCentroConsola());
 				std::cout << "La puntuacion ha sido reseteada!\n";
 				std::cin.get();
 				system("cls");
 				break;
 			case 4:
+				// sale del programa
 				goto salida;
-				break;
 			default:
 				// nunca deberia suceder
 				throw std::invalid_argument("Opcion invalida (0-3) -> " + std::to_string(n));
-				break;
 		}
 	}
 

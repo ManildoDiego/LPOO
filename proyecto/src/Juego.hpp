@@ -40,8 +40,7 @@ extern std::vector<std::pair<std::string, char>> controles;
 class Juego final {
 	using Coords_t = std::pair<int64_t, int64_t>;
 
-	const std::size_t maxPuntuacion;
-	const std::string maxNombre;
+	Data_t maxPuntuacion;
 
 	Mapa        _mapa{};
 	std::size_t _puntuacion    = 0;
@@ -75,26 +74,27 @@ public:
 	std::size_t getPuntuacion() const { return _puntuacion; }
 };
 
-Juego::Juego() : maxPuntuacion(leerPuntuacion()), maxNombre(leerNombre()) {}
+Juego::Juego() : maxPuntuacion(leerData()) {}
 
 Juego::~Juego() {
-	// si la puntuacion actual, es mayor que la maxima, lo guarda
-	if (_puntuacion > maxPuntuacion) {
-		system("cls");
-		std::string nombre{};
-		std::cout << "Nueva maxima puntuacion!: " << _puntuacion << std::endl;
-		setCursorConsola(true);
-		std::cout << "Ingrese nombre del jugador: ";
+	system("cls");
+	std::string nombre{};
+	setCursorConsola(true);
+	std::cout << "Ingrese nombre del jugador: ";
 
-		while (nombre.empty() || nombre == "NULL" || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
-      std::getline(std::cin, nombre);
-    }
+	while (nombre.empty() || nombre == "NULL" || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
+    std::cin >> nombre;
+  }
 
-		setCursorConsola(false);
+	setCursorConsola(false);
 
-		guardarNombre(nombre);
-		guardarPuntuacion(_puntuacion);
+	if (maxPuntuacion != NULLDATA) {
+		maxPuntuacion.push_back({nombre, _puntuacion});
+	} else {
+		maxPuntuacion[0] = {nombre, _puntuacion};
 	}
+
+	guardarData(maxPuntuacion);
 }
 
 void Juego::_ComprobarColisionesFantasmas() {
@@ -254,11 +254,6 @@ std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 
 	gotoxy(offset_x+juego._mapa.columnas, 0);
 	os << color.magenta << "Puntos: " << juego._puntuacion;
-
-	if (juego.maxNombre != "NULL") {
-		gotoxy(offset_x+juego._mapa.columnas, 3);
-		os << color.blue << "Maxima puntuacion: " << juego.maxPuntuacion << " hecha por \"" << juego.maxNombre << "\"";
-	}
 
 	os << color.reset;
 
