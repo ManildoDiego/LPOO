@@ -49,6 +49,7 @@ void salir() {
 	std::cin.get();
 	system("cls");
 
+	setCursorConsola(true);
 	exit(0);
 }
 

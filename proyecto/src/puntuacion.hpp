@@ -4,6 +4,7 @@
 #include <iostream>
 #include <windows.h>
 #include <stdexcept>
+#include <vector>
 
 #include "manejoConsola.hpp"
 
@@ -12,8 +13,6 @@ const char* dataFileName = "others/Data.txt";
 const char* othersDir    = "others";
 
 void crearOthers();
-
-#include <vector>
 
 using Data_t = std::vector<std::pair<std::string, std::size_t>>;
 

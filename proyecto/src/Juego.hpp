@@ -3,6 +3,7 @@
 #include <cctype>
 #include <vector>
 #include <string>
+#include <ctime>
 #include <algorithm>
 
 #include "Pieza.hpp"
@@ -10,10 +11,6 @@
 #include "manejoConsola.hpp"
 #include "puntuacion.hpp"
 #include "Mapa.hpp"
-
-extern "C" {
-	#include <time.h>
-}
 
 #include "Fantasmas/Blinky.hpp"
 #include "Fantasmas/Pinky.hpp"
@@ -132,8 +129,8 @@ void Juego::_ComprobarColisiones() {
 	};
 	
 	if (is_hitting(Tipo_Pieza::FRUTA)) {
-		srand(static_cast<unsigned int>(time(0)));
-		bool fruta_trampa = ((rand() % 4) == 0); // 25%
+		std::srand(static_cast<unsigned int>(std::time(nullptr)));
+		bool fruta_trampa = ((std::rand() % 4) == 0); // 25%
 
 		_puntuacion += 300;
 		_mapa.at(_pacman.getPos().first).at(_pacman.getPos().second) = Piezas.at(Tipo_Pieza::VACIO);
