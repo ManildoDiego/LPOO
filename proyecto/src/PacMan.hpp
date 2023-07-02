@@ -6,21 +6,29 @@
 struct PacMan final {
 	// declaro que Coords_t = std::pair<int64_t, int64_t>
 	using Coords_t = std::pair<int64_t, int64_t>;
-
-	const Coords_t pacmanInitPos = {17, 13};
-	std::size_t vidas = 3;
+private:
+	const Coords_t _pacmanInitPos = {17, 13};
+	std::size_t _vidas = 3;
 
 	// pieza del pacman
-	const Pieza pieza = Piezas.at(Tipo_Pieza::PACMAN);
+	const Pieza _pieza = Piezas.at(Tipo_Pieza::PACMAN);
 	// posicion del pacman
-	Coords_t pos = pacmanInitPos;
+	Coords_t _pos = _pacmanInitPos;
 	// posicion del pacman previa para que los fantasmas puedan predecir movimientos
-	Coords_t prevPos = pacmanInitPos;
-	
+	Coords_t _prevPos = _pacmanInitPos;
+public:
 	// metodo set pos en base a coordenadas
 	void setPos(const Coords_t&, bool);
 	// sobrecarga del metodo set pos en base a x e y
 	void setPos(int64_t, int64_t, bool);
+
+	std::size_t getVidas() const { return _vidas; }
+	Coords_t getPos() const { return _pos; }
+	Coords_t getPrevPos() const { return _prevPos; }
+
+	void murio();
+
+	bool estaMuerto() const { return _vidas < 1; }
 
 	// metodo para imprimir el pacman
 	friend std::ostream& operator<<(std::ostream& os, const PacMan& pac);
@@ -28,10 +36,10 @@ struct PacMan final {
 
 void PacMan::setPos(const Coords_t& new_pos, bool change = false) {
 	if (!change) {
-		prevPos = pos;
+		_prevPos = _pos;
 	}
 
-	pos = new_pos;
+	_pos = new_pos;
 }
 
 void PacMan::setPos(int64_t x, int64_t y, bool change = false) { 
@@ -40,5 +48,10 @@ void PacMan::setPos(int64_t x, int64_t y, bool change = false) {
 
 std::ostream& operator<<(std::ostream& os, const PacMan& pac) { 
 	// imprimo la pieza del pacman (el sprite)
-	return os << pac.pieza;
+	return os << pac._pieza;
+}
+
+void PacMan::murio() {
+	_pos = _pacmanInitPos;
+	_vidas--;
 }

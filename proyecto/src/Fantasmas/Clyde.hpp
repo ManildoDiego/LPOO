@@ -17,10 +17,10 @@ protected:
 			la pregunta fue -> Necesito una funcion _SeguirPacman que si p.pos sea mayor o igual que la distancia del pacman lo siga
 		*/
 		static const double SEGUIR_PACMAN = 8;
-		const double distance = std::sqrt(std::pow(p.pos.first - pos.first, 2) + std::pow(p.pos.second - pos.second, 2));
+		const double distance = std::sqrt(std::pow(p.getPos().first - pos.first, 2) + std::pow(p.getPos().second - pos.second, 2));
 
 		if (distance >= SEGUIR_PACMAN) {
-			pos = _MoverFantasma(pos, pos, p.pos);
+			pos = _MoverFantasma(pos, pos, p.getPos());
 			return;
 		}
 

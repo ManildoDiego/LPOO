@@ -16,8 +16,8 @@ protected:
 			hecho con chat gpt
 			la pregunta fue -> Necesito una funcion _SeguirPacman que p.pos prediga los movimientos de pacman a 2 casillas de distancia
 		*/
-		const int64_t target_x = p.pos.first + 2 * (p.pos.first - pos.first);
-		const int64_t target_y = p.pos.second + 2 * (p.pos.second - pos.second);
+		const auto target_x = p.getPos().first + 2 * (p.getPos().first - pos.first);
+		const auto target_y = p.getPos().second + 2 * (p.getPos().second - pos.second);
 
 		pos = _MoverFantasma(pos, pos, {target_x, target_y});
 	}

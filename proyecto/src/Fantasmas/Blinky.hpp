@@ -12,7 +12,7 @@ struct Blinky final : public Fantasma {
 protected:
 	// sobreescribo el metodo _SeguirPacman
 	void _SeguirPacman(const PacMan& p) override {
-		pos = _MoverFantasma(pos, pos, p.pos);
+		pos = _MoverFantasma(pos, pos, p.getPos());
 	}
 };
 

@@ -145,8 +145,8 @@ void Fantasma::_CorregirPosicion(const Coords_t& ultima_posicion, const Mapa& ma
 }
 
 void Fantasma::_Huir(const PacMan& p) {
-  int64_t move_x = (pos.first - p.pos.first > 0)   ? 1 : -1;
-  int64_t move_y = (pos.second - p.pos.second > 0) ? 1 : -1;
+  int64_t move_x = (pos.first - p.getPos().first > 0)   ? 1 : -1;
+  int64_t move_y = (pos.second - p.getPos().second > 0) ? 1 : -1;
 
 	if (pos == Coords_t{14, 0} && move_y == -1) { // IZQUIERDA
 		pos = {14, COLUMNAS_SIZE-1};

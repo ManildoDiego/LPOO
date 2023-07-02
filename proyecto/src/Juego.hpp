@@ -70,7 +70,7 @@ public:
 
 	void actualizar(char);
 	bool gano();
-	bool murio() const { return _pacman.vidas < 1; }
+	bool murio() const { return _pacman.estaMuerto(); }
 	std::size_t getPuntuacion() const { return _puntuacion; }
 };
 
@@ -99,15 +99,14 @@ Juego::~Juego() {
 
 void Juego::_ComprobarColisionesFantasmas() {
 	for (const auto& f : _fantasmas) {
-		if (f->pos == _pacman.pos) {
+		if (f->pos == _pacman.getPos()) {
 			if (f->huyendo) {
 				f->murio();
 				_puntuacion += 500;
 			}
 			
 			else {
-				_pacman.pos = _pacman.pacmanInitPos;
-				_pacman.vidas--;
+				_pacman.murio();
 				system("cls");
 				break;
 			}
@@ -129,16 +128,15 @@ void Juego::_ComprobarColisiones() {
 	_ComprobarColisionesFantasmas();
 	
 	auto is_hitting = [&](Tipo_Pieza pieza) {
-		return _mapa.at(_pacman.pos.first).at(_pacman.pos.second) == Piezas.at(pieza);
+		return _mapa.at(_pacman.getPos().first).at(_pacman.getPos().second) == Piezas.at(pieza);
 	};
 	
 	if (is_hitting(Tipo_Pieza::FRUTA)) {
 		srand(static_cast<unsigned int>(time(0)));
-
 		bool fruta_trampa = ((rand() % 4) == 0); // 25%
 
 		_puntuacion += 300;
-		_mapa.at(_pacman.pos.first).at(_pacman.pos.second) = Piezas.at(Tipo_Pieza::VACIO);
+		_mapa.at(_pacman.getPos().first).at(_pacman.getPos().second) = Piezas.at(Tipo_Pieza::VACIO);
 
 		if (fruta_trampa) {
 			for (auto& f : _fantasmas) {
@@ -155,7 +153,7 @@ void Juego::_ComprobarColisiones() {
 
 	else if (is_hitting(Tipo_Pieza::PUNTOS)) {
 		_puntuacion += 100;
-		_mapa.at(_pacman.pos.first).at(_pacman.pos.second) = Piezas.at(Tipo_Pieza::VACIO);
+		_mapa.at(_pacman.getPos().first).at(_pacman.getPos().second) = Piezas.at(Tipo_Pieza::VACIO);
 	}
 
 	for (auto& f : _fantasmas) {
@@ -178,22 +176,22 @@ bool Juego::_PosicionValida(const Coords_t& c) {
 }
 
 void Juego::actualizar(char k) {
-	const auto old_position = _pacman.pos;
+	const auto old_position = _pacman.getPos();
 
-	if (_pacman.pos == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
+	if (_pacman.getPos() == Coords_t{14, 0} && MOVER_IZQUIERDA(k)) {
 		_pacman.setPos({14, COLUMNAS_SIZE-1});
 	}
 
-	else if (_pacman.pos == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(k)) {
+	else if (_pacman.getPos() == Coords_t{14, COLUMNAS_SIZE-1} && MOVER_DERECHA(k)) {
 		_pacman.setPos({14, 0});
 	}
 
-	else if (MOVER_ARRIBA(k))    { _pacman.setPos(_pacman.pos.first-1, _pacman.pos.second); }
-	else if (MOVER_ABAJO(k))     { _pacman.setPos(_pacman.pos.first+1, _pacman.pos.second); }
-	else if (MOVER_DERECHA(k))   { _pacman.setPos(_pacman.pos.first, _pacman.pos.second+1); }
-	else if (MOVER_IZQUIERDA(k)) { _pacman.setPos(_pacman.pos.first, _pacman.pos.second-1); }
+	else if (MOVER_ARRIBA(k))    { _pacman.setPos(_pacman.getPos().first-1, _pacman.getPos().second); }
+	else if (MOVER_ABAJO(k))     { _pacman.setPos(_pacman.getPos().first+1, _pacman.getPos().second); }
+	else if (MOVER_DERECHA(k))   { _pacman.setPos(_pacman.getPos().first, _pacman.getPos().second+1); }
+	else if (MOVER_IZQUIERDA(k)) { _pacman.setPos(_pacman.getPos().first, _pacman.getPos().second-1); }
 
-	if (!_PosicionValida(_pacman.pos)) {
+	if (!_PosicionValida(_pacman.getPos())) {
 		_pacman.setPos(old_position, true);
 	}
 	
@@ -237,7 +235,7 @@ std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 				continue;
 			}
 
-			if (juego._pacman.pos == xy) {
+			if (juego._pacman.getPos() == xy) {
 				os << juego._pacman;
 				continue;
 			}
@@ -248,7 +246,7 @@ std::ostream& operator<<(std::ostream& os, const Juego& juego) {
 	}
 
 	gotoxy(offset_x, juego._mapa.filas);
-	for (std::size_t i = 0; i < juego._pacman.vidas; i++) {
+	for (std::size_t i = 0; i < juego._pacman.getVidas(); i++) {
 		os << juego._pacman << ' ';
 	}
 
