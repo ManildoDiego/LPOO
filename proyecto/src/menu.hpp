@@ -143,7 +143,7 @@ bool menu() {
 	// menu de opciones
 	static std::vector<std::string> opciones = {
 		color.green   + "Jugar"                 + color.reset, 
-		color.magenta + "Opciones"              + color.reset, 
+		color.magenta + "Controles"             + color.reset, 
 		color.cyan    + "Ver puntuaciones"      + color.reset,
 		color.orange  + "Resetear puntuaciones" + color.reset,
 		color.red     + "Salir"                 + color.reset,
