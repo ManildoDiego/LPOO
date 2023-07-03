@@ -21,16 +21,6 @@ extern "C" {
 #define ESC   static_cast<char>(27)
 #define ENTER static_cast<char>(13)
 
-// declaro que Tecla_t = std::pair<std::string, char>
-using Tecla_t = std::pair<std::string, char>;
-
-std::vector<Tecla_t> controles = {
-	{color.red     + std::string("ARRIBA   ") + color.reset, 'w'},
-	{color.magenta + std::string("ABAJO    ") + color.reset, 's'},
-	{color.cyan    + std::string("DERECHA  ") + color.reset, 'd'},
-	{color.orange  + std::string("IZQUIERDA") + color.reset, 'a'},
-};
-
 // funcion de salir y creditos
 void salir() {
 	system("cls");
@@ -62,6 +52,13 @@ void perdio() {
 	std::cin.get();
 }
 
+std::vector<Tecla_t> controles = {
+	{color.red     + std::string("ARRIBA   ") + color.reset, 'w'},
+	{color.magenta + std::string("ABAJO    ") + color.reset, 's'},
+	{color.cyan    + std::string("DERECHA  ") + color.reset, 'd'},
+	{color.orange  + std::string("IZQUIERDA") + color.reset, 'a'},
+};
+
 void menuControles() {
 	char inputKey = '\0';
 	size_t n = 0;
@@ -75,6 +72,7 @@ void menuControles() {
 		for (const auto& key : controles) {
 			if (k == key.second) {
 				system("cls");
+				gotoxy(getCentroConsola());
 				std::cout << "\'" << k << "\' esta en controles esa tecla!\n";
 				return true;
 			}
@@ -98,6 +96,7 @@ void menuControles() {
 					return; 
 				}
 				setCursorConsola(true);
+				gotoxy(getCentroConsola());
 				std::cout << "Ingrese una tecla: ";
 				char key = '\0';
 

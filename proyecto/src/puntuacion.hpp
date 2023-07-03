@@ -14,7 +14,9 @@ const char* othersDir    = "others";
 
 void crearOthers();
 
-using Data_t = std::vector<std::pair<std::string, std::size_t>>;
+using Tecla_t   = std::pair<const std::string, char>;
+using Puntaje_t = std::pair<std::string, std::size_t>;
+using Data_t    = std::vector<Puntaje_t>;
 
 #define NULLDATA Data_t{ {"NULL", 0} }
 

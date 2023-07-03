@@ -17,7 +17,7 @@
 #include "Fantasmas/Inky.hpp"
 #include "Fantasmas/Clyde.hpp"
 
-extern std::vector<std::pair<std::string, char>> controles;
+extern std::vector<Tecla_t> controles;
 
 #define FILAS_SIZE 31
 #define COLUMNAS_SIZE 28
@@ -76,6 +76,7 @@ Juego::Juego() : maxPuntuacion(leerData()) {}
 Juego::~Juego() {
 	system("cls");
 	std::string nombre{};
+	gotoxy(getCentroConsola());
 	setCursorConsola(true);
 	std::cout << "Ingrese nombre del jugador: ";
 
