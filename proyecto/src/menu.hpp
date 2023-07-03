@@ -63,7 +63,7 @@ void menuControles() {
 	char inputKey = '\0';
 	size_t n = 0;
 
-	auto esta_en_controles = [](char k, Tecla_t actual) {
+	auto estaEnControles = [](char k, Tecla_t actual) {
 		if (actual.second == k) {
 			system("cls");
 			return false;
@@ -104,7 +104,7 @@ void menuControles() {
 					key = static_cast<char>(getch());
 					setCursorConsola(false);
 					system("cls");
-				} while (iscntrl(key) || isdigit(key) || esta_en_controles(key, controles.at(n)));
+				} while (iscntrl(key) || isdigit(key) || estaEnControles(key, controles.at(n)));
 				
 				controles.at(n).second = key;
 			}
