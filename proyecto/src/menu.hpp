@@ -194,9 +194,9 @@ bool menu() {
 
 				std::size_t i = 0;
 				
-				for (const auto& [nombre, puntos] : data) {
+				for (const auto& d : data) {
 					gotoxy(c.first, c.second+i);
-					std::cout << color.reset << "Puntuacion: " << color.orange << puntos << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << nombre << color.reset << color.cyan << "\"";
+					std::cout << color.reset << "Puntuacion: " << color.orange << d.second << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << d.first << color.reset << color.cyan << "\"";
 					i++;
 				}
 

@@ -31,8 +31,8 @@ void guardarData(const Data_t& data) {
 	}
 	
 
-	for (const auto& [nombre, puntaje] : data) {
-		fprintf(dataFile, "%s %llu\n", nombre.c_str(), puntaje);
+	for (const auto& d : data) {
+		fprintf(dataFile, "%s %llu\n", d.first.c_str(), d.second);
 	}
 
 	fclose(dataFile);
