@@ -196,9 +196,11 @@ bool menu() {
 				for (const auto& d : data) {
 					gotoxy(c.first, c.second+i);
 					if (i < 3) {
-						std::cout << color.green << i+1 << ". ";
+						std::cout << color.green;
+					} else {
+						std::cout << color.red;
 					}
-					std::cout << color.reset << "Puntuacion: " << color.orange << d.second << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << d.first << color.reset << color.cyan << "\"" << color.reset;
+					std::cout << i+1 << ". " << color.reset << "Puntuacion: " << color.orange << d.second << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << d.first << color.reset << color.cyan << "\"" << color.reset;
 					i++;
 				}
 
