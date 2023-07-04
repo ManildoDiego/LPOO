@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <stdexcept>
 #include <vector>
+#include <algorithm>
 
 #include "manejoConsola.hpp"
 
@@ -20,7 +21,24 @@ using Data_t    = std::vector<Puntaje_t>;
 
 #define NULLDATA Data_t{ {"NULL", 0} }
 
-void guardarData(const Data_t& data) {
+void guardarData(Data_t data) {
+	static auto ordenarPorDesc = [](const Puntaje_t& left, const Puntaje_t& right) { 
+		return left.second > right.second; 
+	};
+
+	const auto estaOrdenado = [&] {
+		if (data.size() <= 1) {
+			return true;
+		}
+
+		for (std::size_t i = 1; i < data.size(); i++) {
+	    if (ordenarPorDesc(data[i], data[i-1])) {
+	      return false;
+	    }
+		}
+    return true;
+	}();
+
 	crearOthers();
 	
 	FILE *dataFile = fopen(dataFileName, "w");
@@ -29,10 +47,13 @@ void guardarData(const Data_t& data) {
 		system("cls");
 	  throw std::runtime_error("[ERROR] No se pudo abrir el archivo de \"others/Data.txt\".\n");
 	}
-	
+
+	if (!estaOrdenado) {
+		std::sort(data.begin(), data.end(), ordenarPorDesc);
+	}
 
 	for (const auto& d : data) {
-		fprintf(dataFile, "%s %llu\n", d.first.c_str(), d.second);
+		fprintf(dataFile, "%llu %s\n", d.second, d.first.c_str());
 	}
 
 	fclose(dataFile);
@@ -75,7 +96,7 @@ Data_t leerData() {
 	std::size_t puntuacion;
 
 	while (1) {
-	  if (fscanf(dataFile, "%s %llu", nombre, &puntuacion) == EOF) {
+	  if (fscanf(dataFile, "%llu %[^\n]", &puntuacion, nombre) == EOF) {
 			break;
 		}
 

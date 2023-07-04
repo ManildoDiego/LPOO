@@ -103,7 +103,6 @@ void menuControles() {
 				do {
 					key = static_cast<char>(getch());
 					setCursorConsola(false);
-					system("cls");
 				} while (iscntrl(key) || isdigit(key) || estaEnControles(key, controles.at(n)));
 				
 				controles.at(n).second = key;
@@ -196,13 +195,13 @@ bool menu() {
 				
 				for (const auto& d : data) {
 					gotoxy(c.first, c.second+i);
-					std::cout << color.reset << "Puntuacion: " << color.orange << d.second << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << d.first << color.reset << color.cyan << "\"";
+					std::cout << color.reset << "Puntuacion: " << color.orange << d.second << color.reset << " hecha por: " << color.cyan << "\"" << color.underline << d.first << color.reset << color.cyan << "\"" << color.reset;
 					i++;
 				}
 
-				std::cin.get();
+				gotoxy(c.first, c.second+i+2);
+				system("pause");
 				system("cls");
-				std::cout << color.reset;
 				break;
 			}
 			case 3: 				

@@ -81,7 +81,7 @@ Juego::~Juego() {
 	std::cout << "Ingrese nombre del jugador: ";
 
 	while (nombre.empty() || nombre == "NULL" || std::all_of(nombre.begin(), nombre.end(), [](int c) { return std::isspace(c); })) {
-    std::cin >> nombre;
+    std::getline(std::cin, nombre);
   }
 
 	setCursorConsola(false);
