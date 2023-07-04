@@ -49,9 +49,11 @@ inicio:
 
 		if (juego.gano()) {
 			system("cls");
-			gotoxy(getCentroConsola());
+			const auto c = getCentroConsola();
+			gotoxy(c);
 			cout << color.green << "Ganaste!\n" << color.reset;
-			cin.get();
+			gotoxy(c.first, c.second+1);
+			system("pause");
 			goto inicio;
 		}
 
