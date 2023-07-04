@@ -35,7 +35,7 @@ inicio:
 	while (!juego.murio()) {
 		// si toca el teclado, guarda la tecla
 		if (kbhit()) {
-			inputKey = static_cast<char>(getch());
+			inputKey = static_cast<char>(tolower(getch()));
 		}
 
 		// si toca el ESC sale del juego

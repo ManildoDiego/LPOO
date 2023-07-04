@@ -73,6 +73,7 @@ void menuControles() {
 			if (k == key.second) {
 				system("cls");
 				gotoxy(getCentroConsola());
+				setCursorConsola(false);
 				std::cout << "\'" << k << "\' esta en controles esa tecla!\n";
 				return true;
 			}
@@ -99,13 +100,18 @@ void menuControles() {
 				gotoxy(getCentroConsola());
 				std::cout << "Ingrese una tecla: ";
 				char key = '\0';
+				
+				static auto is_letter = [](char c) {
+					return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+				};
 
 				do {
-					key = static_cast<char>(getch());
-					setCursorConsola(false);
-				} while (iscntrl(key) || isdigit(key) || estaEnControles(key, controles.at(n)));
+					key = static_cast<char>(tolower(getch()));
+				} while (!is_letter(key) || estaEnControles(key, controles.at(n)));
+				setCursorConsola(false);
 				
 				controles.at(n).second = key;
+				system("cls");
 			}
 
 			if (inputKey == ARRIBA && n > 0)     { n--; } 
