@@ -13,7 +13,7 @@
 using namespace std;
 
 int main() {
-inicio:
+	inicio:
 	// preparo la consola
 	system("cls"); 
 	setCursorConsola();

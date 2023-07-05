@@ -22,7 +22,7 @@ using Data_t    = std::vector<Puntaje_t>;
 #define NULL_DATA Data_t{ {"NULL", 0} }
 
 #define ESHIFT 3
-#define __CHAR_BUFFER 1024
+#define __CHAR_BUFFER 128
 
 void guardarData(Data_t data) {
 	crearOthers();
@@ -30,13 +30,18 @@ void guardarData(Data_t data) {
 	FILE *dataFile = fopen(dataFileName, "w");
 	
 	if (dataFileName == NULL) {
-		system("cls");
-	  throw std::runtime_error("[ERROR] No se pudo abrir el archivo de \"others/Data.txt\".\n");
+	  throw std::runtime_error("No se pudo abrir el archivo de \"others/Data.txt\".\n");
 	}
 
-	static const char* scanFormat = (std::string("%llu %") + std::to_string(__CHAR_BUFFER) + "s\n").c_str();
+	// creo esta variable porque asi se puedo decir al fprintf cual es el maximo de caracteres que puede leer
+	static const auto bufferSize = std::to_string(__CHAR_BUFFER);
+	static const auto scanFormat = ("%llu %" + bufferSize + "s\n").c_str();
 
 	for (const auto& d : data) {
+		if (d.first.length() >= __CHAR_BUFFER) {
+		  throw std::runtime_error("El Buffer de lectura de archivos excede el nombre\nSu cantidad de caracteres es mayor a __CHAR_BUFFER -> " + bufferSize);
+		}
+
 		fprintf(dataFile, scanFormat, d.second, d.first.c_str());
 	}
 
@@ -78,9 +83,11 @@ Data_t leerData() {
   char nombre[__CHAR_BUFFER];
 	std::size_t puntuacion;
 
+	static const auto bufferSize = std::to_string(__CHAR_BUFFER);
+	static const auto scanFormat = ("%llu %" + bufferSize + "[^\n]").c_str();
 
 	while (1) {
-	  if (fscanf(dataFile, "%llu %[^\n]", &puntuacion, nombre) == EOF) {
+	  if (fscanf(dataFile, scanFormat, &puntuacion, nombre) == EOF) {
 			break;
 		}
 
