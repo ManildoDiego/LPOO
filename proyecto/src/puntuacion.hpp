@@ -19,7 +19,10 @@ using Tecla_t   = std::pair<const std::string, char>;
 using Puntaje_t = std::pair<std::string, std::size_t>;
 using Data_t    = std::vector<Puntaje_t>;
 
-#define NULLDATA Data_t{ {"NULL", 0} }
+#define NULL_DATA Data_t{ {"NULL", 0} }
+
+#define ESHIFT 3
+#define __CHAR_BUFFER 1024
 
 void guardarData(Data_t data) {
 	crearOthers();
@@ -31,14 +34,15 @@ void guardarData(Data_t data) {
 	  throw std::runtime_error("[ERROR] No se pudo abrir el archivo de \"others/Data.txt\".\n");
 	}
 
+	static const char* scanFormat = (std::string("%llu %") + std::to_string(__CHAR_BUFFER) + "s\n").c_str();
+
 	for (const auto& d : data) {
-		fprintf(dataFile, "%llu %s\n", d.second, d.first.c_str());
+		fprintf(dataFile, scanFormat, d.second, d.first.c_str());
 	}
 
 	fclose(dataFile);
 }
 
-#define __CHAR_BUFFER 255
 
 Data_t leerData() {
 	crearOthers();
@@ -57,7 +61,7 @@ Data_t leerData() {
 		// lo creo
 		dataFile = fopen(dataFileName, "w+");
 	  fclose(dataFile);
-		guardarData(NULLDATA);
+		guardarData(NULL_DATA);
 
 		system("cls");
 		
@@ -67,7 +71,7 @@ Data_t leerData() {
 		Sleep(1000);
 		system("cls");
 		
-		return NULLDATA;
+		return NULL_DATA;
   }
 
 	Data_t data{};

@@ -86,7 +86,7 @@ Juego::~Juego() {
 
 	setCursorConsola(false);
 
-	if (maxPuntuacion != NULLDATA) {
+	if (maxPuntuacion != NULL_DATA) {
 		maxPuntuacion.push_back({nombre, _puntuacion});
 	} else {
 		maxPuntuacion[0] = {nombre, _puntuacion};

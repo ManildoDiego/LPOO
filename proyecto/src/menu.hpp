@@ -187,7 +187,7 @@ bool menu() {
 			case 2: {
 				const auto data = leerData();
 				const auto c = getCentroConsola();
-				if (data == NULLDATA) {
+				if (data == NULL_DATA) {
 					std::cout << color.red;
 					gotoxy(c);
 					std::cout << "Ninguna puntuacion ha sido registrada!\n";
@@ -217,7 +217,7 @@ bool menu() {
 			}
 			case 3: 				
 				// resetea la puntuacion
-				guardarData(NULLDATA);
+				guardarData(NULL_DATA);
 				gotoxy(getCentroConsola());
 				std::cout << "La puntuacion ha sido reseteada!\n";
 				std::cin.get();
